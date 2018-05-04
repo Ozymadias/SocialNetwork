@@ -1,6 +1,9 @@
 package com.socialnet;
 
+import com.mongodb.DBObject;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.jackson.JacksonDataFormat;
+import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
 
@@ -17,24 +20,15 @@ public class MyRouteBuilder extends RouteBuilder {
                 .host("0.0.0.0").port("8080")
                 .bindingMode(RestBindingMode.json);
 
-//        rest().produces("application/json")
-////                .get("/register").to("direct:register")
-//                .get("/showAll").route().to("direct:show");
-//
-////        from("servlet:/localhost:8080/show").to("direct:show");
-//
-//        from("direct:register")
-////                .process(exchange -> {exchange.getIn().getBody(User.class);});
-//                .to("mongodb:mongo?database=test&collection=user&operation=insert");
-//
-//        from("direct:show")
-////                .to("mongodb:mongo?database=test&collection=user&operation=findAll");
-//                .transform().constant("Hello");
+        rest().produces("application/json")
+                .put("/register").to("direct:register")
+                .get("/showAll").route().to("direct:show");
 
-        rest().produces("application/json").get("/hello").route()
-                .to("direct:sth");
+        from("direct:register").convertBodyTo(DBObject.class)
+                .to("mongodb:mongo?database=test&collection=user&operation=insert");
 
-        from("direct:sth")
-                .transform().constant("Hello");
+        from("direct:show")
+                .to("mongodb:mongo?database=test&collection=user&operation=findAll");//.marshal().json(JsonLibrary.Jackson);
+
     }
 }
