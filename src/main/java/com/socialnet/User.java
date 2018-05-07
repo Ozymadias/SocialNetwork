@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Document
 public class User {
@@ -11,7 +12,7 @@ public class User {
     private String id;
     private String name;
     private String city;
-    private LocalDate birthDate;
+    private String birthDate;
 
     public User() {
     }
@@ -19,7 +20,7 @@ public class User {
     public User(String name, String city, LocalDate birthDate) {
         this.name = name;
         this.city = city;
-        this.birthDate = birthDate;
+        this.birthDate = birthDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 
     public String getName() {
@@ -38,11 +39,11 @@ public class User {
         this.city = city;
     }
 
-    public LocalDate getBirthDate() {
+    public String getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(LocalDate birthDate) {
+    public void setBirthDate(String birthDate) {
         this.birthDate = birthDate;
     }
 
