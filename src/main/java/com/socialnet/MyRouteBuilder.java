@@ -20,7 +20,8 @@ public class MyRouteBuilder extends RouteBuilder {
         restConfiguration()
                 .component("servlet")
                 .host("0.0.0.0").port("8085")
-                .bindingMode(RestBindingMode.json);
+                .bindingMode(RestBindingMode.json)
+        .apiContextPath("/api-doc");
 
         rest().produces("application/json")
                 .put("/register").to("direct:insert")
