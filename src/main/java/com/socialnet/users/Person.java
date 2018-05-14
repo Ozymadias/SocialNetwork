@@ -1,4 +1,4 @@
-package com.socialnet;
+package com.socialnet.users;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;

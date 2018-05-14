@@ -1,8 +1,10 @@
-package com.socialnet;
+package com.socialnet.routes;
 
 import com.mongodb.DBObject;
 import com.socialnet.repository.PersonRepository;
 import com.socialnet.repository.UserRepository;
+import com.socialnet.users.Person;
+import com.socialnet.users.User;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,6 @@
 package com.socialnet.repository;
 
-import com.socialnet.User;
+import com.socialnet.users.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

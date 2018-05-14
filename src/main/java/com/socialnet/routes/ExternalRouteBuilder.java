@@ -1,4 +1,4 @@
-package com.socialnet;
+package com.socialnet.routes;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
