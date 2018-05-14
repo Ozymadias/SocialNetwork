@@ -25,12 +25,14 @@ public class ExternalRouteBuilder extends RouteBuilder {
                 .get("/findUsersByCityAndBirthDateBetween").to("direct:findUsersByCityAndBirthDateBetween")
 
                 .post("/insert").to("direct:insert")
-                .post("{userId}/invite").to("direct:invite")
-                .get("{userId}/invitations").to("direct:invitations")
-                .get("{userId}/friends").to("direct:friends")
                 .post("/friend").to("direct:friend")
                 .get("/people").to("direct:people")
                 .get("/allPeopleWithFriends").to("direct:allPeopleWithFriends")
-                .post("/unfriend").to("direct:unfriend");
+
+                .post("{userId}/invite").to("direct:invite")
+                .post("{userId}/acceptInvitation").to("direct:acceptInvitation")
+                .post("{userId}/unfriend").to("direct:unfriend")
+                .get("{userId}/invitations").to("direct:invitations")
+                .get("{userId}/friends").to("direct:friends");
     }
 }

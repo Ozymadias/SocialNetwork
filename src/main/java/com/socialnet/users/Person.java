@@ -57,4 +57,30 @@ public class Person {
     public void removeInviter(Person person) {
         inviters.remove(person);
     }
+
+    public boolean hasInvitationFrom(Person person) {
+        return inviters.contains(person);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Person)) return false;
+
+        Person person = (Person) o;
+
+        if (id != null ? !id.equals(person.id) : person.id != null) return false;
+        if (name != null ? !name.equals(person.name) : person.name != null) return false;
+        if (friends != null ? !friends.equals(person.friends) : person.friends != null) return false;
+        return inviters != null ? inviters.equals(person.inviters) : person.inviters == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (friends != null ? friends.hashCode() : 0);
+        result = 31 * result + (inviters != null ? inviters.hashCode() : 0);
+        return result;
+    }
 }

@@ -30,24 +30,36 @@ public class NeoRouteBuilder extends RouteBuilder {
 
         from("direct:unfriend").process(exchange -> {
             Map<String, Object> headers = exchange.getIn().getHeaders();
-            personRepository.unfriend((String) headers.get("firstName"), (String) headers.get("secondName"));
+            personRepository.unfriend((String) headers.get("userId"), (String) headers.get("friendId"));
         });
 
         from("direct:allPeopleWithFriends").process(exchange -> exchange.getOut().setBody(personRepository.getPeople()));
 
         from("direct:people").process(exchange -> exchange.getOut().setBody(personRepository.getAll()));
 
-        from("direct:invite").process(exchange -> {
-            Map<String, Object> headers = exchange.getIn().getHeaders();
-            Person firstPerson = personRepository.findByName((String) headers.get("userId"));
-            Person secondPerson = personRepository.findByName((String) headers.get("inviteeId"));
-            secondPerson.addInviter(firstPerson);
-            personRepository.save(secondPerson);
-        });
+        from("direct:invite")
+                .choice()
+                .when(exchange -> !personRepository.findByName((String) exchange.getIn().getHeaders().get("userId"))
+                        .hasInvitationFrom(personRepository.findByName((String) exchange.getIn().getHeaders().get("inviteeId"))))
+                .process(exchange -> {
+                    System.out.println("1");
+                    Map<String, Object> headers = exchange.getIn().getHeaders();
+                    Person user = personRepository.findByName((String) headers.get("userId"));
+                    Person invitee = personRepository.findByName((String) headers.get("inviteeId"));
+                    invitee.addInviter(user);
+                    personRepository.save(invitee);
+                })
+                .otherwise()
+                .process(exchange -> {
+                    System.out.println("2");
+                    exchange.getIn().setHeader("inviterId", exchange.getIn().getHeaders().get("inviteeId"));
+                })
+                .to("direct:acceptInvitation");
 
         from("direct:invitations").process(exchange -> {
             Map<String, Object> headers = exchange.getIn().getHeaders();
-            Collection<Person> inviters = personRepository.invitations((String) headers.get("userId"));
+            String currentUser = (String) headers.get("userId");
+            Collection<Person> inviters = personRepository.invitations(currentUser);
             exchange.getOut().setBody(inviters);
         });
 
@@ -55,6 +67,16 @@ public class NeoRouteBuilder extends RouteBuilder {
             Map<String, Object> headers = exchange.getIn().getHeaders();
             Collection<Person> friends = personRepository.friends((String) headers.get("userId"));
             exchange.getOut().setBody(friends);
+        });
+
+        from("direct:acceptInvitation").process(exchange -> {
+            Map<String, Object> headers = exchange.getIn().getHeaders();
+            String userId = (String) headers.get("userId");
+            Person user = personRepository.findByName(userId);
+            String inviterId = (String) headers.get("inviterId");
+            user.addFriendship(personRepository.findByName(inviterId));
+            personRepository.save(user);
+            personRepository.refuseInvitation(inviterId, userId);
         });
     }
 }
