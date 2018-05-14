@@ -26,8 +26,10 @@ public class InternalRouteBuilder extends RouteBuilder {
         from("direct:register").convertBodyTo(DBObject.class)
                 .to("mongodb:mongo?database=test&collection=user&operation=insert");
 
-        from("direct:findAll")
-                .to("mongodb:mongo?database=test&collection=user&operation=findAll");
+        from("direct:findAll").process(exchange -> {
+            exchange.getOut().setBody(repository.findAll());
+        });
+//                .to("mongodb:mongo?database=test&collection=user&operation=findAll");
 
         from("direct:findByName").process(exchange -> {
             String name = (String) exchange.getIn().getHeaders().get("name");

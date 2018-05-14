@@ -16,7 +16,7 @@ public class ExternalRouteBuilder extends RouteBuilder {
 
         rest().produces("application/json")
                 .post("/register").to("direct:register")
-                .get("/showAll").to("direct:findAll")
+                .get("/findAll").to("direct:findAll")
                 .get("/findByName").to("direct:findByName")
                 .get("/findByCity").to("direct:findByCity")
                 .get("/findByNameAndCity").to("direct:findByNameAndCity")
