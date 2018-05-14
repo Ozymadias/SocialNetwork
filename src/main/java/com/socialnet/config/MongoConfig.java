@@ -7,7 +7,6 @@ import com.mongodb.ServerAddress;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +27,6 @@ public class MongoConfig extends AbstractMongoConfiguration {
         List<MongoCredential> credentials = new ArrayList<>();
         credentials.add(MongoCredential.createMongoCRCredential("Dominik", "test", "password".toCharArray()));
         return new MongoClient(seeds, credentials);
-//        return new MongoClient("172.30.137.92", 27017);
+//        return new MongoClient("localhost", 27017);
     }
 }
