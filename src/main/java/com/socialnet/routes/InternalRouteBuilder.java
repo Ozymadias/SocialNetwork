@@ -90,12 +90,6 @@ public class InternalRouteBuilder extends RouteBuilder {
 
         from("direct:unfriend").process(exchange -> {
             Map<String, Object> headers = exchange.getIn().getHeaders();
-//            Person firstPerson = personRepository.findByName(firstName);
-//        Person secondPerson = personRepository.findByName(secondName);
-//        firstPerson.removeFriendship(secondPerson);
-////        secondPerson.removeFriendship(firstPerson);
-//        personRepository.save(firstPerson);
-////        personRepository.save(secondPerson);
             personRepository.unfriend((String) headers.get("firstName"), (String) headers.get("secondName"));
         });
 

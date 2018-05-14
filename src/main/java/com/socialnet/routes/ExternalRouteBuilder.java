@@ -29,6 +29,7 @@ public class ExternalRouteBuilder extends RouteBuilder {
                 .post("/insert").to("direct:insert")
                 .post("/friend").to("direct:friend")
                 .get("/people").to("direct:people")
-                .get("/friends").to("direct:friends");
+                .get("/friends").to("direct:friends")
+                .post("/unfriend").to("direct:unfriend");
     }
 }
