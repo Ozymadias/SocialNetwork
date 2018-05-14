@@ -15,6 +15,9 @@ public class Person {
     @Relationship(type = "IS_FRIEND")
     private Set<Person> friends = new HashSet<>();
 
+    @Relationship(type = "INVITATION", direction = Relationship.INCOMING)
+    private Set<Person> inviters = new HashSet<>();
+
     public Person() {
     }
 
@@ -36,10 +39,22 @@ public class Person {
     }
 
     public void addFriendship(Person friendship) {
-        this.friends.add(friendship);
+        friends.add(friendship);
     }
 
     public void removeFriendship(Person person) {
-        this.friends.remove(person);
+        friends.remove(person);
+    }
+
+    public Set<String> getInviters() {
+        return inviters.stream().map(Person::getName).collect(Collectors.toSet());
+    }
+
+    public void addInviter(Person friendship) {
+        inviters.add(friendship);
+    }
+
+    public void removeInviter(Person person) {
+        inviters.remove(person);
     }
 }

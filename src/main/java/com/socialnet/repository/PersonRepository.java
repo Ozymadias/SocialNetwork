@@ -13,10 +13,15 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
     @Query("MATCH (p1) RETURN p1")
     Collection<Person> getAll();
 
-    //    @Query("MATCH (p1:Person)-[r:IS_FRIEND]->(p2:Person) RETURN p1,r,p2 LIMIT {limit}")
     @Query("MATCH (p1)-[r:IS_FRIEND]->(p2) RETURN p1,r,p2")
     Collection<Person> getPeople();
 
     @Query("MATCH (p1{name: {firstName}})-[r:IS_FRIEND]-(p2{name: {secondName}}) DELETE r")
     void unfriend(@Param("firstName") String firstName, @Param("secondName") String secondName);
+
+    @Query("MATCH (p1)-[r:INVITATION]->(p2{name: {userId}}) RETURN p1")
+    Collection<Person> invitations(@Param("userId") String userId);
+
+    @Query("MATCH (p1)-[r:IS_FRIEND]-(p2{name: {userId}}) RETURN p1")
+    Collection<Person> friends(@Param("userId") String userId);
 }
