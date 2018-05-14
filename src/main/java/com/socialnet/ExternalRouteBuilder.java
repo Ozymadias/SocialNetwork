@@ -1,14 +1,8 @@
 package com.socialnet;
 
-import com.mongodb.DBObject;
-import com.socialnet.repository.UserRepository;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Component
 public class ExternalRouteBuilder extends RouteBuilder {
@@ -21,13 +15,20 @@ public class ExternalRouteBuilder extends RouteBuilder {
                 .apiContextPath("/api-doc");
 
         rest().produces("application/json")
-                .put("/register").to("direct:insert")
+                .post("/register").to("direct:register")
                 .get("/showAll").to("direct:findAll")
                 .get("/findByName").to("direct:findByName")
                 .get("/findByCity").to("direct:findByCity")
                 .get("/findByNameAndCity").to("direct:findByNameAndCity")
                 .get("/findUsersByNameRegex").to("direct:findUsersByNameRegex")
                 .get("/findUsersByBirthDateBetween").to("direct:findUsersByBirthDateBetween")
-                .get("/findUsersByCityAndBirthDateBetween").to("direct:findUsersByCityAndBirthDateBetween");
+                .get("/findUsersByCityAndBirthDateBetween").to("direct:findUsersByCityAndBirthDateBetween")
+
+                .post("/{userName}/invite").to("direct:invite")
+
+                .post("/insert").to("direct:insert")
+                .post("/friend").to("direct:friend")
+                .get("/people").to("direct:people")
+                .get("/friends").to("direct:friends");
     }
 }

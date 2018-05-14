@@ -26,7 +26,7 @@ public class MongoConfig extends AbstractMongoConfiguration {
         seeds.add(new ServerAddress("172.30.137.92", 27017));
         List<MongoCredential> credentials = new ArrayList<>();
         credentials.add(MongoCredential.createMongoCRCredential("Dominik", "test", "password".toCharArray()));
-        return new MongoClient(seeds, credentials);
-//        return new MongoClient("localhost", 27017);
+//        return new MongoClient(seeds, credentials);
+        return new MongoClient("localhost", 27017);
     }
 }
