@@ -2,6 +2,7 @@ package com.socialnet.routes;
 
 import com.socialnet.repository.PersonRepository;
 import com.socialnet.users.Person;
+import org.apache.camel.Predicate;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,9 +17,7 @@ public class NeoRouteBuilder extends RouteBuilder {
 
     @Override
     public void configure() {
-        from("direct:insert").process(exchange -> {
-            personRepository.save(new Person((String) exchange.getIn().getHeaders().get("name")));
-        });
+        from("direct:insert").process(exchange -> personRepository.save(new Person((String) exchange.getIn().getHeaders().get("name"))));
 
         from("direct:friend").process(exchange -> {
             Map<String, Object> headers = exchange.getIn().getHeaders();
@@ -39,22 +38,26 @@ public class NeoRouteBuilder extends RouteBuilder {
 
         from("direct:invite")
                 .choice()
-                .when(exchange -> !personRepository.findByName((String) exchange.getIn().getHeaders().get("userId"))
-                        .hasInvitationFrom(personRepository.findByName((String) exchange.getIn().getHeaders().get("inviteeId"))))
-                .process(exchange -> {
-                    System.out.println("1");
-                    Map<String, Object> headers = exchange.getIn().getHeaders();
-                    Person user = personRepository.findByName((String) headers.get("userId"));
-                    Person invitee = personRepository.findByName((String) headers.get("inviteeId"));
-                    invitee.addInviter(user);
-                    personRepository.save(invitee);
-                })
+                .when(isThePersonWhoUserWantToInviteNotFriendOfHis())
+                .choice()
+                .when(didUserReceiveInvitationFromPersonWhoHeWantsInvite())
+                .to("direct:acceptPreviouslySendInvitation")
                 .otherwise()
-                .process(exchange -> {
-                    System.out.println("2");
-                    exchange.getIn().setHeader("inviterId", exchange.getIn().getHeaders().get("inviteeId"));
-                })
+                .to("direct:sendInvitation")
+                .endChoice()
+                .endChoice();
+
+        from("direct:acceptPreviouslySendInvitation")
+                .process(exchange -> exchange.getIn().setHeader("inviterId", exchange.getIn().getHeaders().get("inviteeId")))
                 .to("direct:acceptInvitation");
+
+        from("direct:sendInvitation").process(exchange -> {
+            Map<String, Object> headers = exchange.getIn().getHeaders();
+            Person user = personRepository.findByName((String) headers.get("userId"));
+            Person invitee = personRepository.findByName((String) headers.get("inviteeId"));
+            invitee.addInviter(user);
+            personRepository.save(invitee);
+        });
 
         from("direct:invitations").process(exchange -> {
             Map<String, Object> headers = exchange.getIn().getHeaders();
@@ -78,5 +81,16 @@ public class NeoRouteBuilder extends RouteBuilder {
             personRepository.save(user);
             personRepository.refuseInvitation(inviterId, userId);
         });
+    }
+
+    private Predicate isThePersonWhoUserWantToInviteNotFriendOfHis() {
+        return exchange -> personRepository
+                .friends((String) exchange.getIn().getHeaders().get("userId")).stream()
+                .map(Person::getName).noneMatch(name -> name.equals(exchange.getIn().getHeaders().get("inviteeId")));
+    }
+
+    private Predicate didUserReceiveInvitationFromPersonWhoHeWantsInvite() {
+        return exchange -> personRepository.findByName((String) exchange.getIn().getHeaders().get("userId"))
+                .hasInvitationFrom(personRepository.findByName((String) exchange.getIn().getHeaders().get("inviteeId")));
     }
 }
