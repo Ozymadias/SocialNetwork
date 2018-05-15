@@ -31,7 +31,7 @@ public class InternalRouteBuilder extends RouteBuilder {
             exchange.getOut().setBody(repository.findAll());
         });
 
-        from("direct:findByName").process(exchange -> {
+        from("direct:findByMongoId").process(exchange -> {
             String name = (String) exchange.getIn().getHeader("name");
             exchange.getOut().setBody(repository.findByName(name));
         });

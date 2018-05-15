@@ -18,7 +18,7 @@ public class ExternalRouteBuilder extends RouteBuilder {
                 .post("/register").to("direct:register")
                 .post("{userId}/postMessage").to("direct:postMessage")
                 .get("/findAll").to("direct:findAll")
-                .get("/findByName").to("direct:findByName")
+                .get("/findByMongoId").to("direct:findByMongoId")
                 .get("/findByCity").to("direct:findByCity")
                 .get("/findByNameAndCity").to("direct:findByNameAndCity")
                 .get("/findUsersByNameRegex").to("direct:findUsersByNameRegex")
