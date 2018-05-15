@@ -1,7 +1,9 @@
 package com.socialnet.routes;
 
+import com.socialnet.users.User;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
+import org.apache.camel.model.rest.RestParamType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -10,9 +12,9 @@ public class ExternalRouteBuilder extends RouteBuilder {
     public void configure() {
         restConfiguration()
                 .component("servlet")
-                .host("0.0.0.0").port("8080")
+//                .host("0.0.0.0").port("8080")
                 .bindingMode(RestBindingMode.json)
-                .contextPath("api")
+                .contextPath("/api")
                 .apiContextPath("/swagger")
                 .apiContextRouteId("swagger")
                 .apiProperty("api.title", "Whatever")
@@ -22,9 +24,18 @@ public class ExternalRouteBuilder extends RouteBuilder {
 
         rest().produces("application/json")
                 .post("/register").to("direct:register")
-                .get("/findAll").to("direct:findAll")
-                .get("/findByName").to("direct:findByName")
-                .get("/findByCity").to("direct:findByCity")
+                .get("/findAll").outTypeList(User.class).to("direct:findAll")
+
+                .get("/findByName")
+                .outTypeList(User.class)
+                    .param().name("name").dataType("string").required(true).type(RestParamType.query).description("User name").endParam()
+                .to("direct:findByName")
+
+                .get("/findByCity")
+                .outTypeList(User.class)
+                .param().name("name").dataType("string").required(true).type(RestParamType.query).description("User name").endParam()
+                .to("direct:findByCity")
+
                 .get("/findByNameAndCity").to("direct:findByNameAndCity")
                 .get("/findUsersByNameRegex").to("direct:findUsersByNameRegex")
                 .get("/findUsersByBirthDateBetween").to("direct:findUsersByBirthDateBetween")

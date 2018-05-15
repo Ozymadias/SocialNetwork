@@ -18,8 +18,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <camel.version>2.21.0</camel.version>
-        <springfox-swagger>2.7.0</springfox-swagger>
+        <camel.version>2.18.3</camel.version>
+        <springfox-swagger>2.8.0</springfox-swagger>
     </properties>
 
     <dependencies>
