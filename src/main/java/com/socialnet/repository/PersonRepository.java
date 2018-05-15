@@ -27,4 +27,7 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
 
     @Query("MATCH (p1{name: {userId}})-[r:INVITATION]->(p2{name: {inviteeId}}) DELETE r")
     void refuseInvitation(@Param("userId") String userId, @Param("inviteeId") String inviteeId);
+
+    @Query("MATCH (p1)-[r:IS_FRIEND*]-(p2{name: {userId}}) RETURN p1")
+    Collection<Person> network(@Param("userId") String userId);
 }

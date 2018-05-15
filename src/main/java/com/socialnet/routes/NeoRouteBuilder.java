@@ -81,6 +81,10 @@ public class NeoRouteBuilder extends RouteBuilder {
             personRepository.save(user);
             personRepository.refuseInvitation(inviterId, userId);
         });
+
+        from("direct:network").process(exchange -> {
+            exchange.getOut().setBody(personRepository.network((String) exchange.getIn().getHeaders().get("userId")));
+        });
     }
 
     private Predicate isThePersonWhoUserWantToInviteNotFriendOfHis() {
