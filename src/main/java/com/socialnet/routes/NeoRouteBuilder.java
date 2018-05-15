@@ -19,22 +19,10 @@ public class NeoRouteBuilder extends RouteBuilder {
     public void configure() {
         from("direct:insert").process(exchange -> personRepository.save(new Person((String) exchange.getIn().getHeaders().get("name"))));
 
-        from("direct:friend").process(exchange -> {
-            Map<String, Object> headers = exchange.getIn().getHeaders();
-            Person firstPerson = personRepository.findByName((String) headers.get("firstName"));
-            Person secondPerson = personRepository.findByName((String) headers.get("secondName"));
-            firstPerson.addFriendship(secondPerson);
-            personRepository.save(firstPerson);
-        });
-
         from("direct:unfriend").process(exchange -> {
             Map<String, Object> headers = exchange.getIn().getHeaders();
             personRepository.unfriend((String) headers.get("userId"), (String) headers.get("friendId"));
         });
-
-        from("direct:allPeopleWithFriends").process(exchange -> exchange.getOut().setBody(personRepository.getPeople()));
-
-        from("direct:people").process(exchange -> exchange.getOut().setBody(personRepository.getAll()));
 
         from("direct:invite")
                 .choice()

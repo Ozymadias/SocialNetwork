@@ -10,12 +10,6 @@ import java.util.Collection;
 public interface PersonRepository extends Neo4jRepository<Person, Long> {
     Person findByName(String name);
 
-    @Query("MATCH (p1) RETURN p1")
-    Collection<Person> getAll();
-
-    @Query("MATCH (p1)-[r:IS_FRIEND]->(p2) RETURN p1,r,p2")
-    Collection<Person> getPeople();
-
     @Query("MATCH (p1{name: {firstName}})-[r:IS_FRIEND]-(p2{name: {secondName}}) DELETE r")
     void unfriend(@Param("firstName") String firstName, @Param("secondName") String secondName);
 
