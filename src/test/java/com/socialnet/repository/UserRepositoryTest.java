@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
@@ -21,13 +22,13 @@ public class UserRepositoryTest {
 
     @Before
     public void setUp() {
-        repository.save(new User("Any Name", "Any City", LocalDate.now()));
+        repository.save(new User("Any Name", "Any City", LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
     }
 
     @Test
     public void test() {
         //given
-        User user = new User("Name Surname", "Krakow", LocalDate.of(1999, 9, 13));
+        User user = new User("Name Surname", "Krakow", LocalDate.of(1999, 9, 13).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 
         //when
         repository.save(user);

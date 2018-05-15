@@ -1,11 +1,8 @@
 package com.socialnet.users;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,10 +18,10 @@ public class User {
     public User() {
     }
 
-    public User(String name, String city, LocalDate birthDate) {
+    public User(String name, String city, String birthDate) {
         this.name = name;
         this.city = city;
-        this.birthDate = birthDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        this.birthDate = birthDate;
     }
 
     public String getId() {
@@ -63,7 +60,7 @@ public class User {
         messages.add(message);
     }
 
-//    @JsonIgnore
+    //    @JsonIgnore
     public List<Message> getMessages() {
         return messages;
     }

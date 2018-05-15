@@ -25,8 +25,6 @@ public class ExternalRouteBuilder extends RouteBuilder {
                 .get("/findUsersByBirthDateBetween").to("direct:findUsersByBirthDateBetween")
                 .get("/findUsersByCityAndBirthDateBetween").to("direct:findUsersByCityAndBirthDateBetween")
 
-                .post("/insert").to("direct:insert")
-
                 .post("{userId}/invite").to("direct:invite")
                 .post("{userId}/acceptInvitation").to("direct:acceptInvitation")
                 .post("{userId}/unfriend").to("direct:unfriend")

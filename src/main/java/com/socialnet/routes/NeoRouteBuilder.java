@@ -17,7 +17,7 @@ public class NeoRouteBuilder extends RouteBuilder {
 
     @Override
     public void configure() {
-        from("direct:insert").process(exchange -> personRepository.save(new Person((String) exchange.getIn().getHeaders().get("name"))));
+        from("direct:insert").process(exchange -> personRepository.save(new Person((String) exchange.getIn().getHeader("neo4jId"))));
 
         from("direct:unfriend").process(exchange -> {
             Map<String, Object> headers = exchange.getIn().getHeaders();
@@ -36,7 +36,7 @@ public class NeoRouteBuilder extends RouteBuilder {
                 .endChoice();
 
         from("direct:acceptPreviouslySendInvitation")
-                .process(exchange -> exchange.getIn().setHeader("inviterId", exchange.getIn().getHeaders().get("inviteeId")))
+                .process(exchange -> exchange.getIn().setHeader("inviterId", exchange.getIn().getHeader("inviteeId")))
                 .to("direct:acceptInvitation");
 
         from("direct:sendInvitation").process(exchange -> {
@@ -48,15 +48,13 @@ public class NeoRouteBuilder extends RouteBuilder {
         });
 
         from("direct:invitations").process(exchange -> {
-            Map<String, Object> headers = exchange.getIn().getHeaders();
-            String currentUser = (String) headers.get("userId");
+            String currentUser = (String) exchange.getIn().getHeader("userId");
             Collection<Person> inviters = personRepository.invitations(currentUser);
             exchange.getOut().setBody(inviters);
         });
 
         from("direct:friends").process(exchange -> {
-            Map<String, Object> headers = exchange.getIn().getHeaders();
-            Collection<Person> friends = personRepository.friends((String) headers.get("userId"));
+            Collection<Person> friends = personRepository.friends((String) exchange.getIn().getHeader("userId"));
             exchange.getOut().setBody(friends);
         });
 
@@ -71,18 +69,18 @@ public class NeoRouteBuilder extends RouteBuilder {
         });
 
         from("direct:network").process(exchange -> {
-            exchange.getOut().setBody(personRepository.network((String) exchange.getIn().getHeaders().get("userId")));
+            exchange.getOut().setBody(personRepository.network((String) exchange.getIn().getHeader("userId")));
         });
     }
 
     private Predicate isThePersonWhoUserWantToInviteNotFriendOfHis() {
         return exchange -> personRepository
-                .friends((String) exchange.getIn().getHeaders().get("userId")).stream()
-                .map(Person::getName).noneMatch(name -> name.equals(exchange.getIn().getHeaders().get("inviteeId")));
+                .friends((String) exchange.getIn().getHeader("userId")).stream()
+                .map(Person::getName).noneMatch(name -> name.equals(exchange.getIn().getHeader("inviteeId")));
     }
 
     private Predicate didUserReceiveInvitationFromPersonWhoHeWantsInvite() {
-        return exchange -> personRepository.findByName((String) exchange.getIn().getHeaders().get("userId"))
-                .hasInvitationFrom(personRepository.findByName((String) exchange.getIn().getHeaders().get("inviteeId")));
+        return exchange -> personRepository.findByName((String) exchange.getIn().getHeader("userId"))
+                .hasInvitationFrom(personRepository.findByName((String) exchange.getIn().getHeader("inviteeId")));
     }
 }
