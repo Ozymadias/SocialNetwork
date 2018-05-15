@@ -10,9 +10,15 @@ public class ExternalRouteBuilder extends RouteBuilder {
     public void configure() {
         restConfiguration()
                 .component("servlet")
-                .host("0.0.0.0").port("8085")
+                .host("0.0.0.0").port("8080")
                 .bindingMode(RestBindingMode.json)
-                .apiContextPath("/api-doc");
+                .contextPath("api")
+                .apiContextPath("/swagger")
+                .apiContextRouteId("swagger")
+                .apiProperty("api.title", "Whatever")
+                .apiProperty("api.version", "1")
+                .scheme("http,https")
+                .host("localhost:8080");
 
         rest().produces("application/json")
                 .post("/register").to("direct:register")
