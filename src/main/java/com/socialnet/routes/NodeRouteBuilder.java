@@ -67,7 +67,7 @@ public class NodeRouteBuilder extends RouteBuilder {
             String inviterId = (String) headers.get("inviterId");
             Node inviter = nodeRepository.findByMongoId(inviterId);
 
-            if(nodeRepository.invitations(userId).contains(inviter)) {
+            if (nodeRepository.invitations(userId).contains(inviter)) {
                 user.addFriendship(inviter);
                 nodeRepository.save(user);
                 nodeRepository.refuseInvitation(inviterId, userId);
@@ -92,6 +92,11 @@ public class NodeRouteBuilder extends RouteBuilder {
             Set<String> networkIds = nodeRepository.network(userId).stream().map(Node::getMongoId).collect(Collectors.toSet());
             exchange.getOut().setBody(networkIds);
         }).to("direct:messages");
+
+        from("direct:distance").process(exchange -> {
+            Integer distanceFactor = nodeRepository.distanceFactor((String) exchange.getIn().getHeader("userId"), (String) exchange.getIn().getHeader("id"));
+            exchange.getOut().setBody(distanceFactor != null ? distanceFactor : 0);
+        });
     }
 
     private Predicate isThePersonWhoUserWantToInviteNotFriendOfHis() {
