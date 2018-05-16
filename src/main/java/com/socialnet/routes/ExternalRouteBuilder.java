@@ -29,6 +29,7 @@ public class ExternalRouteBuilder extends RouteBuilder {
 
                 .post("{userId}/invite").to("direct:invite")
                 .post("{userId}/acceptInvitation").to("direct:acceptInvitation")
+                .post("{userId}/refuseInvitation").to("direct:refuseInvitation")
                 .post("{userId}/unfriend").to("direct:unfriend")
                 .get("{userId}/invitations").to("direct:invitations")
                 .get("{userId}/friends").to("direct:friends")

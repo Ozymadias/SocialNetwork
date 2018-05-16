@@ -75,6 +75,9 @@ public class NodeRouteBuilder extends RouteBuilder {
         from("direct:network").process(exchange -> {
             exchange.getOut().setBody(nodeRepository.network((String) exchange.getIn().getHeader("userId")));
         });
+
+        from("direct:refuseInvitation").process(exchange ->
+                nodeRepository.refuseInvitation((String) exchange.getIn().getHeader("userId"), (String) exchange.getIn().getHeader("inviterId")));
     }
 
     private Predicate isThePersonWhoUserWantToInviteNotFriendOfHis() {
