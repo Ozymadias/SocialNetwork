@@ -13,7 +13,6 @@ public class User {
     private String name;
     private String city;
     private String birthDate;
-    private List<Message> messages = new ArrayList<>();
 
     public User() {
     }
@@ -54,19 +53,6 @@ public class User {
 
     public void setBirthDate(String birthDate) {
         this.birthDate = birthDate;
-    }
-
-    public void addMessage(Message message) {
-        messages.add(message);
-    }
-
-    //    @JsonIgnore
-    public List<Message> getMessages() {
-        return messages;
-    }
-
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
     }
 
     @Override

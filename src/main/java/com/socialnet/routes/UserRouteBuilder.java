@@ -1,7 +1,6 @@
 package com.socialnet.routes;
 
 import com.socialnet.repository.UserRepository;
-import com.socialnet.users.Message;
 import com.socialnet.users.User;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,14 +11,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Component
-public class InternalRouteBuilder extends RouteBuilder {
+public class UserRouteBuilder extends RouteBuilder {
     @Autowired
     UserRepository repository;
 
     @Override
     public void configure() {
-//        from("direct:register").convertBodyTo(DBObject.class)
-//                .to("mongodb:mongo?database=test&collection=user&operation=insert")
         from("direct:register").process(exchange -> {
             Map<String, Object> headers = exchange.getIn().getHeaders();
             User user = new User((String) headers.get("name"), (String) headers.get("city"), (String) headers.get("birthDate"));
@@ -27,9 +24,7 @@ public class InternalRouteBuilder extends RouteBuilder {
             exchange.getOut().setHeader("neo4jId", user.getId());
         }).to("direct:insert");
 
-        from("direct:findAll").process(exchange -> {
-            exchange.getOut().setBody(repository.findAll());
-        });
+        from("direct:findAll").process(exchange -> exchange.getOut().setBody(repository.findAll()));
 
         from("direct:findByMongoId").process(exchange -> {
             String name = (String) exchange.getIn().getHeader("name");
@@ -67,12 +62,6 @@ public class InternalRouteBuilder extends RouteBuilder {
             String dateLT = LocalDate.now().minusYears(ageGT).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             String dateGT = LocalDate.now().minusYears(ageLT).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             exchange.getOut().setBody(repository.findUsersByCityAndBirthDateBetween(city, dateGT, dateLT));
-        });
-
-        from("direct:postMessage").process(exchange -> {
-            User userId = repository.findById((String) exchange.getIn().getHeader("userId"));
-            userId.addMessage(new Message((String) exchange.getIn().getHeader("message"), System.currentTimeMillis()));
-            repository.save(userId);
         });
     }
 }

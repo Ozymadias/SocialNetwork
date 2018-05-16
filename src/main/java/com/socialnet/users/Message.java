@@ -1,15 +1,38 @@
 package com.socialnet.users;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document
 public class Message {
+    @Id
+    private String id;
+    private String authorId;
     private String message;
-    private long timestamp;
 
     public Message() {
+//        new ObjectId("a").getTimestamp();
     }
 
-    public Message(String message, long timestamp) {
+    public Message(String authorId, String message) {
+        this.authorId = authorId;
         this.message = message;
-        this.timestamp = timestamp;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
     }
 
     public String getMessage() {
@@ -18,13 +41,5 @@ public class Message {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 }

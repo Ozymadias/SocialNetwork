@@ -16,7 +16,6 @@ public class ExternalRouteBuilder extends RouteBuilder {
 
         rest().produces("application/json")
                 .post("/register").to("direct:register")
-                .post("{userId}/postMessage").to("direct:postMessage")
                 .get("/findAll").to("direct:findAll")
                 .get("/findByMongoId").to("direct:findByMongoId")
                 .get("/findByCity").to("direct:findByCity")
@@ -24,6 +23,9 @@ public class ExternalRouteBuilder extends RouteBuilder {
                 .get("/findUsersByNameRegex").to("direct:findUsersByNameRegex")
                 .get("/findUsersByBirthDateBetween").to("direct:findUsersByBirthDateBetween")
                 .get("/findUsersByCityAndBirthDateBetween").to("direct:findUsersByCityAndBirthDateBetween")
+
+                .post("{userId}/postMessage").to("direct:postMessage")
+                .get("/messages").to("direct:messages")
 
                 .post("{userId}/invite").to("direct:invite")
                 .post("{userId}/acceptInvitation").to("direct:acceptInvitation")

@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.Map;
 
 @Component
-public class NeoRouteBuilder extends RouteBuilder {
+public class NodeRouteBuilder extends RouteBuilder {
     @Autowired
     NodeRepository nodeRepository;
 
