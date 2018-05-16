@@ -25,7 +25,9 @@ public class ExternalRouteBuilder extends RouteBuilder {
                 .get("/findUsersByCityAndBirthDateBetween").to("direct:findUsersByCityAndBirthDateBetween")
 
                 .post("{userId}/postMessage").to("direct:postMessage")
-                .get("/messages").to("direct:messages")
+                .get("/messages").to("direct:allMessages")
+                .get("{userId}/friendMessages").to("direct:findFriends")
+                .get("{userId}/networkMessages").to("direct:findNetwork")
 
                 .post("{userId}/invite").to("direct:invite")
                 .post("{userId}/acceptInvitation").to("direct:acceptInvitation")

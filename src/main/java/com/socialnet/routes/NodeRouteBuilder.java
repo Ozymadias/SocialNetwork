@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class NodeRouteBuilder extends RouteBuilder {
@@ -78,6 +80,18 @@ public class NodeRouteBuilder extends RouteBuilder {
 
         from("direct:refuseInvitation").process(exchange ->
                 nodeRepository.refuseInvitation((String) exchange.getIn().getHeader("userId"), (String) exchange.getIn().getHeader("inviterId")));
+
+        from("direct:findFriends").process(exchange -> {
+            String userId = (String) exchange.getIn().getHeader("userId");
+            Set<String> friendIds = nodeRepository.friends(userId).stream().map(Node::getMongoId).collect(Collectors.toSet());
+            exchange.getOut().setBody(friendIds);
+        }).to("direct:messages");
+
+        from("direct:findNetwork").process(exchange -> {
+            String userId = (String) exchange.getIn().getHeader("userId");
+            Set<String> networkIds = nodeRepository.network(userId).stream().map(Node::getMongoId).collect(Collectors.toSet());
+            exchange.getOut().setBody(networkIds);
+        }).to("direct:messages");
     }
 
     private Predicate isThePersonWhoUserWantToInviteNotFriendOfHis() {
