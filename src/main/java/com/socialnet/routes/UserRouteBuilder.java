@@ -21,7 +21,7 @@ public class UserRouteBuilder extends RouteBuilder {
             Map<String, Object> headers = exchange.getIn().getHeaders();
             User user = new User((String) headers.get("name"), (String) headers.get("city"), (String) headers.get("birthDate"));
             repository.save(user);
-            exchange.getOut().setHeader("neo4jId", user.getId());
+            exchange.getOut().setHeader("mongoId", user.getId());
         }).to("direct:insert");
 
         from("direct:findAll").process(exchange -> exchange.getOut().setBody(repository.findAll()));

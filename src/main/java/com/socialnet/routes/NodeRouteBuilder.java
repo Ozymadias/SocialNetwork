@@ -17,7 +17,7 @@ public class NodeRouteBuilder extends RouteBuilder {
 
     @Override
     public void configure() {
-        from("direct:insert").process(exchange -> nodeRepository.save(new Node((String) exchange.getIn().getHeader("neo4jId"))));
+        from("direct:insert").process(exchange -> nodeRepository.save(new Node((String) exchange.getIn().getHeader("mongoId"))));
 
         from("direct:unfriend").process(exchange -> {
             Map<String, Object> headers = exchange.getIn().getHeaders();
@@ -63,9 +63,13 @@ public class NodeRouteBuilder extends RouteBuilder {
             String userId = (String) headers.get("userId");
             Node user = nodeRepository.findByMongoId(userId);
             String inviterId = (String) headers.get("inviterId");
-            user.addFriendship(nodeRepository.findByMongoId(inviterId));
-            nodeRepository.save(user);
-            nodeRepository.refuseInvitation(inviterId, userId);
+            Node inviter = nodeRepository.findByMongoId(inviterId);
+
+            if(nodeRepository.invitations(userId).contains(inviter)) {
+                user.addFriendship(inviter);
+                nodeRepository.save(user);
+                nodeRepository.refuseInvitation(inviterId, userId);
+            }
         });
 
         from("direct:network").process(exchange -> {
