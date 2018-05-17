@@ -24,18 +24,20 @@ public class ExternalRouteBuilder extends RouteBuilder {
                 .get("/findUsersByBirthDateBetween").to("direct:findUsersByBirthDateBetween")
                 .get("/findUsersByCityAndBirthDateBetween").to("direct:findUsersByCityAndBirthDateBetween")
 
-                .post("{userId}/postMessage").to("direct:postMessage")
-                .get("/messages").to("direct:allMessages")
-                .get("{userId}/friendMessages").to("direct:findFriends")
-                .get("{userId}/networkMessages").to("direct:findNetwork")
+                .get("/messages").to("direct:allMessages");
 
-                .post("{userId}/invite").to("direct:invite")
-                .post("{userId}/acceptInvitation").to("direct:acceptInvitation")
-                .post("{userId}/refuseInvitation").to("direct:refuseInvitation")
-                .post("{userId}/unfriend").to("direct:unfriend")
-                .get("{userId}/invitations").to("direct:invitations")
-                .get("{userId}/friends").to("direct:friends")
-                .get("{userId}/network").to("direct:network")
-                .get("{userId}/distance").to("direct:distance");
+        rest("{userId}")
+                .post("/postMessage").to("direct:postMessage")
+                .get("/friendMessages").to("direct:findFriends")
+                .get("/networkMessages").to("direct:findNetwork")
+
+                .post("/invite").to("direct:invite")
+                .post("/acceptInvitation").to("direct:acceptInvitation")
+                .post("/refuseInvitation").to("direct:refuseInvitation")
+                .post("/unfriend").to("direct:unfriend")
+                .get("/invitations").to("direct:invitations")
+                .get("/friends").to("direct:friends")
+                .get("/network").to("direct:network")
+                .get("/distance").to("direct:distance");
     }
 }
