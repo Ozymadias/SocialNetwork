@@ -45,8 +45,11 @@ public class NodeRouteBuilder extends RouteBuilder {
             Map<String, Object> headers = exchange.getIn().getHeaders();
             Node user = nodeRepository.findByMongoId((String) headers.get("userId"));
             Node invitee = nodeRepository.findByMongoId((String) headers.get("inviteeId"));
-            invitee.addInviter(user);
-            nodeRepository.save(invitee);
+            if(!user.equals(invitee)) {
+                invitee.addInviter(user);
+                nodeRepository.save(invitee);
+            } else
+                exchange.getOut().setBody("You can not sent invitation to yourself");
         });
 
         from("direct:invitations").process(exchange -> {
