@@ -23,7 +23,7 @@ public class MessageRouteBuilder extends RouteBuilder {
     public void configure() {
         from("direct:postMessage").process(exchange -> {
             String userId = (String) exchange.getIn().getHeader("userId");
-            String message = (String) exchange.getIn().getHeader("message");
+            String message = exchange.getIn().getBody(String.class);
             messageRepository.save(new Message(userId, message));
         });
 
