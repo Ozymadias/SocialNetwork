@@ -63,21 +63,5 @@ public class UserRouteBuilder extends RouteBuilder {
             String dateGT = LocalDate.now().minusYears(ageLT).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             exchange.getOut().setBody(repository.findUsersByCityAndBirthDateBetween(city, dateGT, dateLT));
         });
-
-        from("direct:saveResult").process(exchange -> {
-            User user = repository.findById((String) exchange.getIn().getHeader("userId"));
-            user.saveResult(exchange.getIn().getBody(Integer.class));
-            repository.save(user);
-        });
-
-        from("direct:lastRequestResult").process(exchange -> {
-            User user = repository.findById((String) exchange.getIn().getHeader("userId"));
-            Integer result = user.provideResult();
-            exchange.getOut().setBody(result != null ? result : "Request is not computed yet");
-            if (result != null) {
-                user.saveResult(null);
-                repository.save(user);
-            }
-        });
     }
 }

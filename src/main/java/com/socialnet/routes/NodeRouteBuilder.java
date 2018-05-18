@@ -99,7 +99,7 @@ public class NodeRouteBuilder extends RouteBuilder {
         from("direct:distance").wireTap("activemq:queue:distance").process(exchange -> exchange.getOut().setBody("Request received"));
 
         from("activemq:queue:distance").process(exchange -> {
-            Thread.sleep(10000);
+            Thread.sleep(2000);
             String userId = (String) exchange.getIn().getHeader("userId");
             String otherId = (String) exchange.getIn().getHeader("id");
             Integer distanceFactor = nodeRepository.distanceFactor(userId, otherId);
