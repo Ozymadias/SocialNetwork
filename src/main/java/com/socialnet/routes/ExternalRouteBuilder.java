@@ -38,6 +38,8 @@ public class ExternalRouteBuilder extends RouteBuilder {
                 .get("/invitations").to("direct:invitations")
                 .get("/friends").to("direct:friends")
                 .get("/network").to("direct:network")
-                .get("/distance").to("direct:distance");
+
+                .get("/distance").to("direct:distance")
+                .get("/lastRequestResult").to("direct:lastRequestResult");
     }
 }

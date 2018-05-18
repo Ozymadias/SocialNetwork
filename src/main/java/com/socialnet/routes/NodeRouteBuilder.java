@@ -93,10 +93,15 @@ public class NodeRouteBuilder extends RouteBuilder {
             exchange.getOut().setBody(networkIds);
         }).to("direct:messages");
 
-        from("direct:distance").process(exchange -> {
-            Integer distanceFactor = nodeRepository.distanceFactor((String) exchange.getIn().getHeader("userId"), (String) exchange.getIn().getHeader("id"));
-            exchange.getOut().setBody(distanceFactor != null ? distanceFactor : 0);
-        });
+        from("direct:distance").wireTap("activemq:queue:distance").process(exchange -> exchange.getOut().setBody("Request received"));
+
+        from("activemq:queue:distance").process(exchange -> {
+            Thread.sleep(10000);
+            String userId = (String) exchange.getIn().getHeader("userId");
+            String otherId = (String) exchange.getIn().getHeader("id");
+            Integer distanceFactor = nodeRepository.distanceFactor(userId, otherId);
+            exchange.getIn().setBody(distanceFactor != null ? distanceFactor : 0);
+        }).to("direct:saveResult");
     }
 
     private Predicate isThePersonWhoUserWantToInviteNotFriendOfHis() {
