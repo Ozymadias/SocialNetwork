@@ -24,7 +24,8 @@ public class ExternalRouteBuilder extends RouteBuilder {
                 .get("/findUsersByBirthDateBetween").to("direct:findUsersByBirthDateBetween")
                 .get("/findUsersByCityAndBirthDateBetween").to("direct:findUsersByCityAndBirthDateBetween")
 
-                .get("/messages").to("direct:allMessages");
+                .get("/messages").to("direct:allMessages")
+                .get("/neo").to("direct:neo");
 
         rest("{userId}")
                 .post("/postMessage").to("direct:postMessage")

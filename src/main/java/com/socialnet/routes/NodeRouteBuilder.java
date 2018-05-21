@@ -7,10 +7,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Arrays;
 
 @Component
 public class NodeRouteBuilder extends RouteBuilder {
@@ -19,18 +16,20 @@ public class NodeRouteBuilder extends RouteBuilder {
 
     @Override
     public void configure() {
-        from("direct:insert").process(exchange -> nodeRepository.save(new Node((String) exchange.getIn().getHeader("mongoId"))));
+        from("direct:insert")
+                .to("bean:nodeBean?method=insert(${header.mongoId})");
 
-        from("direct:unfriend").process(exchange -> {
-            Map<String, Object> headers = exchange.getIn().getHeaders();
-            nodeRepository.unfriend((String) headers.get("userId"), (String) headers.get("friendId"));
-        });
+        from("direct:ins").process(exchange ->
+                Arrays.stream(exchange.getIn().getBody(String[].class)).forEach(u -> nodeRepository.save(new Node(u))));
+
+        from("direct:unfriend")
+                .to("bean:nodeBean?method=unfriend(${header.userId}, ${header.friendId})");
 
         from("direct:invite")
                 .choice()
-                .when(isThePersonWhoUserWantToInviteNotFriendOfHis())
+                .when(isThePersonWhoUserWantToInviteNotFriendOfHis)
                 .choice()
-                .when(didUserReceiveInvitationFromPersonWhoHeWantsInvite())
+                .when(didUserReceiveInvitationFromPersonWhoHeWantsInvite)
                 .to("direct:acceptPreviouslySendInvitation")
                 .otherwise()
                 .to("direct:sendInvitation")
@@ -41,80 +40,51 @@ public class NodeRouteBuilder extends RouteBuilder {
                 .process(exchange -> exchange.getIn().setHeader("inviterId", exchange.getIn().getHeader("inviteeId")))
                 .to("direct:acceptInvitation");
 
-        from("direct:sendInvitation").process(exchange -> {
-            Map<String, Object> headers = exchange.getIn().getHeaders();
-            Node user = nodeRepository.findByMongoId((String) headers.get("userId"));
-            Node invitee = nodeRepository.findByMongoId((String) headers.get("inviteeId"));
-            if(!user.equals(invitee)) {
-                invitee.addInviter(user);
-                nodeRepository.save(invitee);
-            } else
-                exchange.getOut().setBody("You can not sent invitation to yourself");
-        });
+        from("direct:sendInvitation")
+                .choice()
+                .when(header("userId").isEqualTo(header("inviteeId")))
+                .process(exchange -> exchange.getOut().setBody("You can not sent invitation to yourself"))
+                .otherwise()
+                .to("bean:nodeBean?method=sendInvitation(${header.userId}, ${header.inviteeId})");
 
-        from("direct:invitations").process(exchange -> {
-            String currentUser = (String) exchange.getIn().getHeader("userId");
-            Collection<Node> inviters = nodeRepository.invitations(currentUser);
-            exchange.getOut().setBody(inviters);
-        });
+        from("direct:invitations")
+                .to("bean:nodeBean?method=invitations(${header.userId})");
 
-        from("direct:friends").process(exchange -> {
-            Collection<Node> friends = nodeRepository.friends((String) exchange.getIn().getHeader("userId"));
-            exchange.getOut().setBody(friends);
-        });
+        from("direct:friends")
+                .to("bean:nodeBean?method=friends(${header.userId})");
 
-        from("direct:acceptInvitation").process(exchange -> {
-            Map<String, Object> headers = exchange.getIn().getHeaders();
-            String userId = (String) headers.get("userId");
-            Node user = nodeRepository.findByMongoId(userId);
-            String inviterId = (String) headers.get("inviterId");
-            Node inviter = nodeRepository.findByMongoId(inviterId);
+        from("direct:acceptInvitation")
+                .to("bean:nodeBean?method=acceptInvitation(${header.userId}, ${header.inviterId})");
 
-            if (nodeRepository.invitations(userId).contains(inviter)) {
-                user.addFriendship(inviter);
-                nodeRepository.save(user);
-                nodeRepository.refuseInvitation(inviterId, userId);
-            }
-        });
+        from("direct:network")
+                .to("bean:nodeBean?method=network(${header.userId})");
 
-        from("direct:network").process(exchange -> {
-            exchange.getOut().setBody(nodeRepository.network((String) exchange.getIn().getHeader("userId")));
-        });
+        from("direct:refuseInvitation")
+                .to("bean:nodeBean?method=refuseInvitation(${header.userId}, ${header.inviterId})");
 
-        from("direct:refuseInvitation").process(exchange ->
-                nodeRepository.refuseInvitation((String) exchange.getIn().getHeader("userId"), (String) exchange.getIn().getHeader("inviterId")));
+        from("direct:findFriends")
+                .to("bean:nodeBean?method=findFriends(${header.userId})")
+                .to("direct:messages");
 
-        from("direct:findFriends").process(exchange -> {
-            String userId = (String) exchange.getIn().getHeader("userId");
-            Set<String> friendIds = nodeRepository.friends(userId).stream().map(Node::getMongoId).collect(Collectors.toSet());
-            exchange.getOut().setBody(friendIds);
-        }).to("direct:messages");
+        from("direct:findNetwork")
+                .to("bean:nodeBean?method=findNetwork(${header.userId})")
+                .to("direct:messages");
 
-        from("direct:findNetwork").process(exchange -> {
-            String userId = (String) exchange.getIn().getHeader("userId");
-            Set<String> networkIds = nodeRepository.network(userId).stream().map(Node::getMongoId).collect(Collectors.toSet());
-            exchange.getOut().setBody(networkIds);
-        }).to("direct:messages");
+        from("direct:distance")
+                .wireTap("activemq:queue:distance?concurrentConsumers=10")
+                .process(exchange -> exchange.getOut().setBody("Request received"));
 
-        from("direct:distance").wireTap("activemq:queue:distance").process(exchange -> exchange.getOut().setBody("Request received"));
-
-        from("activemq:queue:distance").process(exchange -> {
-            Thread.sleep(2000);
-            String userId = (String) exchange.getIn().getHeader("userId");
-            String otherId = (String) exchange.getIn().getHeader("id");
-            Integer distanceFactor = nodeRepository.distanceFactor(userId, otherId);
-            exchange.getIn().setBody(distanceFactor != null ? distanceFactor : 0);
-        }).to("direct:saveResult");
+        from("activemq:queue:distance")
+                .to("bean:nodeBean?method=computeDistance(${header.userId}, ${header.id})")
+                .to("direct:saveResult");
     }
 
-    private Predicate isThePersonWhoUserWantToInviteNotFriendOfHis() {
-        return exchange -> nodeRepository
-                .friends((String) exchange.getIn().getHeader("userId")).stream()
-                .map(Node::getMongoId).noneMatch(name -> name.equals(exchange.getIn().getHeader("inviteeId")));
-    }
+    Predicate isThePersonWhoUserWantToInviteNotFriendOfHis =
+            exchange -> nodeRepository
+                    .friends((String) exchange.getIn().getHeader("userId")).stream()
+                    .map(Node::getMongoId).noneMatch(name -> name.equals(exchange.getIn().getHeader("inviteeId")));
 
-    private Predicate didUserReceiveInvitationFromPersonWhoHeWantsInvite() {
-        return exchange -> nodeRepository.findByMongoId((String) exchange.getIn().getHeader("userId"))
-                .hasInvitationFrom(nodeRepository.findByMongoId((String) exchange.getIn().getHeader("inviteeId")));
-    }
+    Predicate didUserReceiveInvitationFromPersonWhoHeWantsInvite =
+            exchange -> nodeRepository.findByMongoId((String) exchange.getIn().getHeader("userId"))
+                    .hasInvitationFrom(nodeRepository.findByMongoId((String) exchange.getIn().getHeader("inviteeId")));
 }
