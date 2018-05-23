@@ -30,14 +30,16 @@ public class MessageService {
     }
 
     public UserMessage[] receiveAllMessages() {
-        UserMessage[] messages = userRepository.findAll().stream().flatMap(userToUserMessage).toArray(UserMessage[]::new);
-        Arrays.sort(messages);
-        return messages;
+        return getUsersMessages(userRepository.findAll().stream());
     }
 
     public UserMessage[] receiveMessages(Set<String> ids) {
         Iterable<User> all = userRepository.findAll(ids);
-        UserMessage[] messages = StreamSupport.stream(all.spliterator(), false).flatMap(userToUserMessage).toArray(UserMessage[]::new);
+        return getUsersMessages(StreamSupport.stream(all.spliterator(), false));
+    }
+
+    private UserMessage[] getUsersMessages(Stream<User> userStream) {
+        UserMessage[] messages = userStream.flatMap(userToUserMessage).toArray(UserMessage[]::new);
         Arrays.sort(messages);
         return messages;
     }

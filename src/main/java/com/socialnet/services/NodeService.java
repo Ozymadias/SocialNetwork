@@ -47,7 +47,6 @@ public class NodeService {
             nodeRepository.save(user);
             nodeRepository.refuseInvitation(inviterId, userId);
         }
-
     }
 
     public Collection<Node> network(String userId) {
