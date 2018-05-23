@@ -1,7 +1,10 @@
-package com.socialnet.users;
+package com.socialnet.pojos;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Document
 public class User {
@@ -10,7 +13,7 @@ public class User {
     private String name;
     private String city;
     private String birthDate;
-    private Integer result;
+    private List<Message> messages = new ArrayList<>();
 
     public User() {
     }
@@ -53,6 +56,14 @@ public class User {
         this.birthDate = birthDate;
     }
 
+    public List<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -82,14 +93,6 @@ public class User {
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (city != null ? city.hashCode() : 0);
         result = 31 * result + (birthDate != null ? birthDate.hashCode() : 0);
-        return result;
-    }
-
-    public void saveResult(Integer result) {
-        this.result = result;
-    }
-
-    public Integer provideResult() {
         return result;
     }
 }

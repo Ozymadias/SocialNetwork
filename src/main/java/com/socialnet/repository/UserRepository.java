@@ -1,6 +1,6 @@
 package com.socialnet.repository;
 
-import com.socialnet.users.User;
+import com.socialnet.pojos.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

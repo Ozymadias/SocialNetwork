@@ -1,7 +1,7 @@
-package com.socialnet.beans;
+package com.socialnet.services;
 
 import com.socialnet.repository.NodeRepository;
-import com.socialnet.users.Node;
+import com.socialnet.pojos.Node;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class NodeBean {
+public class NodeService {
     @Autowired
     NodeRepository nodeRepository;
 

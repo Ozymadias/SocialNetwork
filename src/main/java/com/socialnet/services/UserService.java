@@ -1,7 +1,7 @@
-package com.socialnet.beans;
+package com.socialnet.services;
 
 import com.socialnet.repository.UserRepository;
-import com.socialnet.users.User;
+import com.socialnet.pojos.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
-public class UserBean {
+public class UserService {
     @Autowired
     UserRepository userRepository;
 
@@ -25,7 +25,9 @@ public class UserBean {
     }
 
     public List<User> findAll() {
-        return userRepository.findAll();
+        List<User> all = userRepository.findAll();
+        all.forEach(user -> user.getMessages().clear());
+        return all;
     }
 
     public User findByMongoId(String id) {
@@ -49,7 +51,6 @@ public class UserBean {
         String dateGT = LocalDate.now().minusYears(Integer.valueOf(ageLT)).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         return userRepository.findUsersByBirthDateBetween(dateGT, dateLT);
     }
-
 
     public List<User> findUsersByCityAndBirthDateBetween(String city, String ageGT, String ageLT) {
         String dateLT = LocalDate.now().minusYears(Integer.valueOf(ageGT)).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));

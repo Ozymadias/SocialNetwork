@@ -8,31 +8,31 @@ public class UserRouteBuilder extends RouteBuilder {
     @Override
     public void configure() {
         from("direct:register")
-                .to("bean:userBean?method=register(${header.name}, ${header.city}, ${header.birthDate})")
+                .to("bean:userService?method=register(${header.name}, ${header.city}, ${header.birthDate})")
                 .process(exchange -> exchange.getOut().setHeader("mongoId", exchange.getIn().getBody(String.class)))
                 .to("direct:insert");
 
-        from("direct:neo").to("bean:userBean?method=neo()").to("direct:ins");
+        from("direct:neo").to("bean:userService?method=neo()").to("direct:ins");
 
         from("direct:findAll")
-                .to("bean:userBean?method=findAll()");
+                .to("bean:userService?method=findAll()");
 
         from("direct:findByMongoId")
-                .to("bean:userBean?method=findByMongoId(${header.id})");
+                .to("bean:userService?method=findByMongoId(${header.id})");
 
         from("direct:findByCity")
-                .to("bean:userBean?method=findByCity(${header.city})");
+                .to("bean:userService?method=findByCity(${header.city})");
 
         from("direct:findByNameAndCity")
-                .to("bean:userBean?method=findByNameAndCity(${header.name}, ${header.city})");
+                .to("bean:userService?method=findByNameAndCity(${header.name}, ${header.city})");
 
         from("direct:findUsersByNameRegex")
-                .to("bean:userBean?method=findUsersByNameRegex(${header.name})");
+                .to("bean:userService?method=findUsersByNameRegex(${header.name})");
 
         from("direct:findUsersByBirthDateBetween")
-                .to("bean:userBean?method=findUsersByBirthDateBetween(${header.ageGT}, ${header.ageLT})");
+                .to("bean:userService?method=findUsersByBirthDateBetween(${header.ageGT}, ${header.ageLT})");
 
         from("direct:findUsersByCityAndBirthDateBetween")
-                .to("bean:userBean?method=findUsersByCityAndBirthDateBetween(${header.city}, ${header.ageGT}, ${header.ageLT})");
+                .to("bean:userService?method=findUsersByCityAndBirthDateBetween(${header.city}, ${header.ageGT}, ${header.ageLT})");
     }
 }

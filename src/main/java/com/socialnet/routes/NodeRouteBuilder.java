@@ -1,7 +1,7 @@
 package com.socialnet.routes;
 
 import com.socialnet.repository.NodeRepository;
-import com.socialnet.users.Node;
+import com.socialnet.pojos.Node;
 import org.apache.camel.Predicate;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,19 +17,20 @@ public class NodeRouteBuilder extends RouteBuilder {
     @Override
     public void configure() {
         from("direct:insert")
-                .to("bean:nodeBean?method=insert(${header.mongoId})");
+                .to("bean:nodeService?method=insert(${header.mongoId})");
 
         from("direct:ins").process(exchange ->
                 Arrays.stream(exchange.getIn().getBody(String[].class)).forEach(u -> nodeRepository.save(new Node(u))));
 
         from("direct:unfriend")
-                .to("bean:nodeBean?method=unfriend(${header.userId}, ${header.friendId})");
+                .to("bean:nodeService?method=unfriend(${header.userId}, ${header.friendId})");
 
         from("direct:invite")
                 .choice()
                 .when(isThePersonWhoUserWantToInviteNotFriendOfHis)
                 .choice()
                 .when(didUserReceiveInvitationFromPersonWhoHeWantsInvite)
+                .to("direct:acceptPreviouslySendInvitation")
                 .to("direct:acceptPreviouslySendInvitation")
                 .otherwise()
                 .to("direct:sendInvitation")
@@ -45,29 +46,29 @@ public class NodeRouteBuilder extends RouteBuilder {
                 .when(header("userId").isEqualTo(header("inviteeId")))
                 .process(exchange -> exchange.getOut().setBody("You can not sent invitation to yourself"))
                 .otherwise()
-                .to("bean:nodeBean?method=sendInvitation(${header.userId}, ${header.inviteeId})");
+                .to("bean:nodeService?method=sendInvitation(${header.userId}, ${header.inviteeId})");
 
         from("direct:invitations")
-                .to("bean:nodeBean?method=invitations(${header.userId})");
+                .to("bean:nodeService?method=invitations(${header.userId})");
 
         from("direct:friends")
-                .to("bean:nodeBean?method=friends(${header.userId})");
+                .to("bean:nodeService?method=friends(${header.userId})");
 
         from("direct:acceptInvitation")
-                .to("bean:nodeBean?method=acceptInvitation(${header.userId}, ${header.inviterId})");
+                .to("bean:nodeService?method=acceptInvitation(${header.userId}, ${header.inviterId})");
 
         from("direct:network")
-                .to("bean:nodeBean?method=network(${header.userId})");
+                .to("bean:nodeService?method=network(${header.userId})");
 
         from("direct:refuseInvitation")
-                .to("bean:nodeBean?method=refuseInvitation(${header.userId}, ${header.inviterId})");
+                .to("bean:nodeService?method=refuseInvitation(${header.userId}, ${header.inviterId})");
 
         from("direct:findFriends")
-                .to("bean:nodeBean?method=findFriends(${header.userId})")
+                .to("bean:nodeService?method=findFriends(${header.userId})")
                 .to("direct:messages");
 
         from("direct:findNetwork")
-                .to("bean:nodeBean?method=findNetwork(${header.userId})")
+                .to("bean:nodeService?method=findNetwork(${header.userId})")
                 .to("direct:messages");
 
         from("direct:distance")
@@ -75,7 +76,7 @@ public class NodeRouteBuilder extends RouteBuilder {
                 .process(exchange -> exchange.getOut().setBody("Request received"));
 
         from("activemq:queue:distance")
-                .to("bean:nodeBean?method=computeDistance(${header.userId}, ${header.id})")
+                .to("bean:nodeService?method=computeDistance(${header.userId}, ${header.id})")
                 .to("direct:saveResult");
     }
 
