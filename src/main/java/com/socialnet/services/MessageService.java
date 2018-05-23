@@ -3,7 +3,7 @@ package com.socialnet.services;
 import com.socialnet.pojos.Message;
 import com.socialnet.pojos.User;
 import com.socialnet.pojos.UserMessage;
-import com.socialnet.repository.UserRepository;
+import com.socialnet.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

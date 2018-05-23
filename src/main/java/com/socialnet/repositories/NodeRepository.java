@@ -1,4 +1,4 @@
-package com.socialnet.repository;
+package com.socialnet.repositories;
 
 import com.socialnet.pojos.Node;
 import org.springframework.data.neo4j.annotation.Query;

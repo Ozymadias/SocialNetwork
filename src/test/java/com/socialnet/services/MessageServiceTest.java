@@ -1,7 +1,7 @@
 package com.socialnet.services;
 
 import com.socialnet.pojos.User;
-import com.socialnet.repository.UserRepository;
+import com.socialnet.repositories.UserRepository;
 import org.junit.Assert;
 import org.mockito.*;
 import org.testng.annotations.BeforeMethod;

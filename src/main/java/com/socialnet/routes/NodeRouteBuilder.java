@@ -1,6 +1,6 @@
 package com.socialnet.routes;
 
-import com.socialnet.repository.NodeRepository;
+import com.socialnet.repositories.NodeRepository;
 import com.socialnet.pojos.Node;
 import org.apache.camel.Predicate;
 import org.apache.camel.builder.RouteBuilder;

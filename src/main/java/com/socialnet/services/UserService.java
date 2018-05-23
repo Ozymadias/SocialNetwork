@@ -1,6 +1,6 @@
 package com.socialnet.services;
 
-import com.socialnet.repository.UserRepository;
+import com.socialnet.repositories.UserRepository;
 import com.socialnet.pojos.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
