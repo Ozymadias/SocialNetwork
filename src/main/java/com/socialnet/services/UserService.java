@@ -20,10 +20,6 @@ public class UserService {
         return user.getId();
     }
 
-    public Object[] neo() {
-        return userRepository.findAll().stream().map(User::getId).toArray();
-    }
-
     public List<User> findAll() {
         List<User> all = userRepository.findAll();
         all.forEach(user -> user.getMessages().clear());

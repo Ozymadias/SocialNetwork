@@ -19,9 +19,6 @@ public class NodeRouteBuilder extends RouteBuilder {
         from("direct:insert")
                 .to("bean:nodeService?method=insert(${header.mongoId})");
 
-        from("direct:ins").process(exchange ->
-                Arrays.stream(exchange.getIn().getBody(String[].class)).forEach(u -> nodeRepository.save(new Node(u))));
-
         from("direct:unfriend")
                 .to("bean:nodeService?method=unfriend(${header.userId}, ${header.friendId})");
 

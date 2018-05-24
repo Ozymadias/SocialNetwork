@@ -12,8 +12,6 @@ public class UserRouteBuilder extends RouteBuilder {
                 .process(exchange -> exchange.getOut().setHeader("mongoId", exchange.getIn().getBody(String.class)))
                 .to("direct:insert");
 
-        from("direct:neo").to("bean:userService?method=neo()").to("direct:ins");
-
         from("direct:findAll")
                 .to("bean:userService?method=findAll()");
 
