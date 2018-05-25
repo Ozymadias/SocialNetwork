@@ -20,7 +20,7 @@ public interface NodeRepository extends Neo4jRepository<Node, Long> {
     Collection<Node> friends(@Param("userId") String userId);
 
     @Query("MATCH (p1{mongoId: {userId}})-[r:INVITATION]-(p2{mongoId: {inviteeId}}) DELETE r")
-    void refuseInvitation(@Param("userId") String userId, @Param("inviteeId") String inviteeId);
+    void declineInvitation(@Param("userId") String userId, @Param("inviteeId") String inviteeId);
 
     @Query("MATCH (p1)-[r:IS_FRIEND*]-(p2{mongoId: {userId}}) RETURN p1")
     Collection<Node> network(@Param("userId") String userId);

@@ -1,7 +1,7 @@
 package com.socialnet.services;
 
-import com.socialnet.repositories.NodeRepository;
 import com.socialnet.pojos.Node;
+import com.socialnet.repositories.NodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +45,7 @@ public class NodeService {
         if (nodeRepository.invitations(userId).contains(inviter)) {
             user.addFriendship(inviter);
             nodeRepository.save(user);
-            nodeRepository.refuseInvitation(inviterId, userId);
+            nodeRepository.declineInvitation(inviterId, userId);
         }
     }
 
@@ -53,8 +53,8 @@ public class NodeService {
         return nodeRepository.network(userId);
     }
 
-    public void refuseInvitation(String userId, String inviterId) {
-        nodeRepository.refuseInvitation(userId, inviterId);
+    public void declineInvitation(String userId, String inviterId) {
+        nodeRepository.declineInvitation(userId, inviterId);
     }
 
     public Set<String> findFriends(String userId) {

@@ -1,13 +1,11 @@
 package com.socialnet.routes;
 
-import com.socialnet.repositories.NodeRepository;
 import com.socialnet.pojos.Node;
+import com.socialnet.repositories.NodeRepository;
 import org.apache.camel.Predicate;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
 
 @Component
 public class NodeRouteBuilder extends RouteBuilder {
@@ -57,8 +55,8 @@ public class NodeRouteBuilder extends RouteBuilder {
         from("direct:network")
                 .to("bean:nodeService?method=network(${header.userId})");
 
-        from("direct:refuseInvitation")
-                .to("bean:nodeService?method=refuseInvitation(${header.userId}, ${header.inviterId})");
+        from("direct:declineInvitation")
+                .to("bean:nodeService?method=declineInvitation(${header.userId}, ${header.inviterId})");
 
         from("direct:findFriends")
                 .to("bean:nodeService?method=findFriends(${header.userId})")

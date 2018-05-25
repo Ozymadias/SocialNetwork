@@ -33,7 +33,7 @@ public class ExternalRouteBuilder extends RouteBuilder {
 
                 .post("/invite").to("direct:invite")
                 .post("/acceptInvitation").to("direct:acceptInvitation")
-                .post("/refuseInvitation").to("direct:refuseInvitation")
+                .post("/declineInvitation").to("direct:declineInvitation")
                 .post("/unfriend").to("direct:unfriend")
                 .get("/invitations").to("direct:invitations")
                 .get("/friends").to("direct:friends")
