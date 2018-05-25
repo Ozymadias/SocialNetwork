@@ -2,6 +2,7 @@ package com.socialnet;
 
 import com.socialnet.pojos.Node;
 import com.socialnet.pojos.User;
+import com.socialnet.pojos.UserMessage;
 import com.socialnet.repositories.NodeRepository;
 import com.socialnet.repositories.UserRepository;
 import io.restassured.response.Response;
@@ -188,6 +189,192 @@ public class IntegrationTest {
         Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String secondMongoId = secondResponse.getHeader("mongoId");
         given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+
         given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", contains(secondMongoId));
+    }
+
+    @Test
+    public void whenSendingAnotherInvitationToSamePersonNothingShouldHappened() {
+        String name = "Name";
+        String city = "City";
+        String birthDate = "0-1-1";
+
+        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String mongoId = response.getHeader("mongoId");
+        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String secondMongoId = secondResponse.getHeader("mongoId");
+        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+
+        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", contains(secondMongoId));
+    }
+
+    @Test
+    public void whenSendingInvitationToYourselfNothingShouldHappened() {
+        String name = "Name";
+        String city = "City";
+        String birthDate = "0-1-1";
+
+        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String mongoId = response.getHeader("mongoId");
+        given().port(port).when().post("/" + mongoId + "/invite?inviteeId=" + mongoId);
+
+        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(mongoId)));
+    }
+
+    @Test
+    public void whenTwoPersonSendInvitationToEachOtherShouldBecomeFriends() {
+        String name = "Name";
+        String city = "City";
+        String birthDate = "0-1-1";
+
+        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String mongoId = response.getHeader("mongoId");
+        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String secondMongoId = secondResponse.getHeader("mongoId");
+        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().port(port).when().post("/" + mongoId + "/invite?inviteeId=" + secondMongoId);
+
+        given().port(port).when().get("/" + mongoId + "/friends").then().body("mongoId", contains(secondMongoId));
+        given().port(port).when().get("/" + secondMongoId + "/friends").then().body("mongoId", contains(mongoId));
+    }
+
+    @Test
+    public void whenTwoPersonSendInvitationToEachOtherAllInvitationShouldBeRemoved() {
+        String name = "Name";
+        String city = "City";
+        String birthDate = "0-1-1";
+
+        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String mongoId = response.getHeader("mongoId");
+        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String secondMongoId = secondResponse.getHeader("mongoId");
+        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().port(port).when().post("/" + mongoId + "/invite?inviteeId=" + secondMongoId);
+
+        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
+        given().port(port).when().get("/" + secondMongoId + "/invitations").then().body("mongoId", not(contains(mongoId)));
+    }
+
+    @Test
+    public void whenInvitationIsAcceptInviterAndInviteeShouldBeFriends() {
+        String name = "Name";
+        String city = "City";
+        String birthDate = "0-1-1";
+
+        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String mongoId = response.getHeader("mongoId");
+        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String secondMongoId = secondResponse.getHeader("mongoId");
+        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().port(port).when().post("/" + mongoId + "/acceptInvitation?inviterId=" + secondMongoId);
+
+        given().port(port).when().get("/" + mongoId + "/friends").then().body("mongoId", contains(secondMongoId));
+        given().port(port).when().get("/" + secondMongoId + "/friends").then().body("mongoId", contains(mongoId));
+    }
+
+    @Test
+    public void whenInvitationIsAcceptInviterAndInviteeAllInvitationShouldBeRemoved() {
+        String name = "Name";
+        String city = "City";
+        String birthDate = "0-1-1";
+
+        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String mongoId = response.getHeader("mongoId");
+        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String secondMongoId = secondResponse.getHeader("mongoId");
+        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().port(port).when().post("/" + mongoId + "/acceptInvitation?inviterId=" + secondMongoId);
+
+        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
+        given().port(port).when().get("/" + secondMongoId + "/invitations").then().body("mongoId", not(contains(mongoId)));
+    }
+
+    @Test
+    public void whenOneAcceptInvitationFromPersonWhoDidNotSendInvitationNothingShouldHappened() {
+        String name = "Name";
+        String city = "City";
+        String birthDate = "0-1-1";
+
+        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String mongoId = response.getHeader("mongoId");
+        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String secondMongoId = secondResponse.getHeader("mongoId");
+        given().port(port).when().post("/" + mongoId + "/acceptInvitation?inviterId=" + secondMongoId);
+
+        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
+        given().port(port).when().get("/" + secondMongoId + "/invitations").then().body("mongoId", not(contains(mongoId)));
+        given().port(port).when().get("/" + mongoId + "/friends").then().body("mongoId", not(contains(secondMongoId)));
+        given().port(port).when().get("/" + secondMongoId + "/friends").then().body("mongoId", not(contains(mongoId)));
+    }
+
+    @Test
+    public void whenOneInviteOnesFriendNotingShouldHappened() {
+        String name = "Name";
+        String city = "City";
+        String birthDate = "0-1-1";
+
+        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String mongoId = response.getHeader("mongoId");
+        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String secondMongoId = secondResponse.getHeader("mongoId");
+        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().port(port).when().post("/" + mongoId + "/acceptInvitation?inviterId=" + secondMongoId);
+        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+
+        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
+    }
+
+    @Test
+    public void whenOneDeclineInvitationOneShouldHaveNotHaveThatInvitation() {
+        String name = "Name";
+        String city = "City";
+        String birthDate = "0-1-1";
+
+        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String mongoId = response.getHeader("mongoId");
+        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String secondMongoId = secondResponse.getHeader("mongoId");
+        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().port(port).when().post("/" + mongoId + "/declineInvitation?inviterId=" + secondMongoId);
+
+        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
+    }
+
+    @Test
+    public void friendsShouldBePartOfNetwork() {
+        String name = "Name";
+        String city = "City";
+        String birthDate = "0-1-1";
+
+        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String mongoId = response.getHeader("mongoId");
+        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String secondMongoId = secondResponse.getHeader("mongoId");
+        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().port(port).when().post("/" + mongoId + "/invite?inviteeId=" + secondMongoId);
+
+        given().port(port).when().get("/" + mongoId + "/network").then().body("mongoId", contains(secondMongoId));
+        given().port(port).when().get("/" + secondMongoId + "/network").then().body("mongoId", contains(mongoId));
+    }
+
+    @Test
+    public void friendsOfFriendsShouldBePartOfNetwork() {
+        String name = "Name";
+        String city = "City";
+        String birthDate = "0-1-1";
+
+        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String mongoId = response.getHeader("mongoId");
+        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String secondMongoId = secondResponse.getHeader("mongoId");
+        Response thirdResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String thirdMongoId = thirdResponse.getHeader("mongoId");
+        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().port(port).when().post("/" + mongoId + "/invite?inviteeId=" + secondMongoId);
+        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + thirdMongoId);
+        given().port(port).when().post("/" + thirdMongoId + "/invite?inviteeId=" + secondMongoId);
+
+        given().port(port).when().get("/" + mongoId + "/network").then().body("mongoId", contains(secondMongoId, thirdMongoId));
     }
 }
