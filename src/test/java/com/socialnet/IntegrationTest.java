@@ -2,9 +2,9 @@ package com.socialnet;
 
 import com.socialnet.pojos.Node;
 import com.socialnet.pojos.User;
-import com.socialnet.pojos.UserMessage;
 import com.socialnet.repositories.NodeRepository;
 import com.socialnet.repositories.UserRepository;
+import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,21 +36,21 @@ public class IntegrationTest {
 
     @Autowired
     private NodeRepository nodeRepository;
+    private Response response;
 
     @Before
     public void setUp() {
+        RestAssured.port = port;
         userRepository.deleteAll();
         nodeRepository.deleteAll();
     }
 
     @Test
     public void databaseShouldBeEmptyAtTheBeginning() {
-        given().port(port).when()
-                .get("/findAll")
-                .then()
-                .statusCode(200);
+        response = given().when().get("/findAll");
 
-        User[] users = given().port(port).when().get("/findAll").as(User[].class);
+        response.then().statusCode(200);
+        User[] users = given().when().get("/findAll").as(User[].class);
         assertThat(users.length, is(0));
     }
 
@@ -59,9 +59,9 @@ public class IntegrationTest {
         String name = "Name";
         String city = "City";
         String birthDate = "0-2-2";
-        given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate).then().statusCode(200);
+        given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate).then().statusCode(200);
 
-        Response response = given().port(port).when().get("/findAll");
+        Response response = given().when().get("/findAll");
 
         response.then().statusCode(200);
         response.then().body("name", contains(name));
@@ -74,7 +74,7 @@ public class IntegrationTest {
         String name = "Name";
         String city = "City";
         String birthDate = "0-2-2";
-        given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate).then().statusCode(200);
+        given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate).then().statusCode(200);
 
         List<User> users = userRepository.findAll();
         assertThat(users.size(), is(1));
@@ -89,7 +89,7 @@ public class IntegrationTest {
         String name = "Name";
         String city = "City";
         String birthDate = "0-2-2";
-        given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate).then().statusCode(200);
+        given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate).then().statusCode(200);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class IntegrationTest {
         User userToSave = new User(name, city, birthDate);
         userRepository.save(userToSave);
 
-        User[] users = given().port(port).when().get("/findAll").as(User[].class);
+        User[] users = given().when().get("/findAll").as(User[].class);
         assertThat(users.length, is(1));
         assertThat(users[0], is(userToSave));
     }
@@ -113,7 +113,7 @@ public class IntegrationTest {
         User userToSave = new User(name, city, birthDate);
         userRepository.save(userToSave);
 
-        Response response = given().port(port).when().get("/findByCity?city=" + city);
+        Response response = given().when().get("/findByCity?city=" + city);
 
         response.then().statusCode(200);
         User[] users = response.as(User[].class);
@@ -134,7 +134,7 @@ public class IntegrationTest {
         userRepository.save(secondUserToSave);
         userRepository.save(userToSave);
 
-        Response response = given().port(port).when().get("/findByCity?city=" + city);
+        Response response = given().when().get("/findByCity?city=" + city);
 
         response.then().statusCode(200);
         User[] users = response.as(User[].class);
@@ -156,7 +156,7 @@ public class IntegrationTest {
         userRepository.save(secondUserToSave);
         userRepository.save(userToSave);
 
-        Response response = given().port(port).when().get("/findAll");
+        Response response = given().when().get("/findAll");
 
         response.then().statusCode(200);
         User[] users = response.as(User[].class);
@@ -169,9 +169,9 @@ public class IntegrationTest {
         String name = "Name";
         String city = "City";
         String birthDate = "0-1-1";
-
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
+
         Iterable<Node> all = nodeRepository.findAll();
 
         assertTrue(all.iterator().hasNext());
@@ -184,13 +184,13 @@ public class IntegrationTest {
         String city = "City";
         String birthDate = "0-1-1";
 
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
-        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response secondResponse = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String secondMongoId = secondResponse.getHeader("mongoId");
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
 
-        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", contains(secondMongoId));
+        given().when().get("/" + mongoId + "/invitations").then().body("mongoId", contains(secondMongoId));
     }
 
     @Test
@@ -199,14 +199,14 @@ public class IntegrationTest {
         String city = "City";
         String birthDate = "0-1-1";
 
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
-        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response secondResponse = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String secondMongoId = secondResponse.getHeader("mongoId");
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
 
-        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", contains(secondMongoId));
+        given().when().get("/" + mongoId + "/invitations").then().body("mongoId", contains(secondMongoId));
     }
 
     @Test
@@ -215,11 +215,11 @@ public class IntegrationTest {
         String city = "City";
         String birthDate = "0-1-1";
 
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
-        given().port(port).when().post("/" + mongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + mongoId + "/invite?inviteeId=" + mongoId);
 
-        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(mongoId)));
+        given().when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(mongoId)));
     }
 
     @Test
@@ -228,15 +228,15 @@ public class IntegrationTest {
         String city = "City";
         String birthDate = "0-1-1";
 
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
-        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response secondResponse = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String secondMongoId = secondResponse.getHeader("mongoId");
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
-        given().port(port).when().post("/" + mongoId + "/invite?inviteeId=" + secondMongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + mongoId + "/invite?inviteeId=" + secondMongoId);
 
-        given().port(port).when().get("/" + mongoId + "/friends").then().body("mongoId", contains(secondMongoId));
-        given().port(port).when().get("/" + secondMongoId + "/friends").then().body("mongoId", contains(mongoId));
+        given().when().get("/" + mongoId + "/friends").then().body("mongoId", contains(secondMongoId));
+        given().when().get("/" + secondMongoId + "/friends").then().body("mongoId", contains(mongoId));
     }
 
     @Test
@@ -245,15 +245,15 @@ public class IntegrationTest {
         String city = "City";
         String birthDate = "0-1-1";
 
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
-        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response secondResponse = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String secondMongoId = secondResponse.getHeader("mongoId");
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
-        given().port(port).when().post("/" + mongoId + "/invite?inviteeId=" + secondMongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + mongoId + "/invite?inviteeId=" + secondMongoId);
 
-        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
-        given().port(port).when().get("/" + secondMongoId + "/invitations").then().body("mongoId", not(contains(mongoId)));
+        given().when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
+        given().when().get("/" + secondMongoId + "/invitations").then().body("mongoId", not(contains(mongoId)));
     }
 
     @Test
@@ -262,15 +262,15 @@ public class IntegrationTest {
         String city = "City";
         String birthDate = "0-1-1";
 
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
-        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response secondResponse = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String secondMongoId = secondResponse.getHeader("mongoId");
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
-        given().port(port).when().post("/" + mongoId + "/acceptInvitation?inviterId=" + secondMongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + mongoId + "/acceptInvitation?inviterId=" + secondMongoId);
 
-        given().port(port).when().get("/" + mongoId + "/friends").then().body("mongoId", contains(secondMongoId));
-        given().port(port).when().get("/" + secondMongoId + "/friends").then().body("mongoId", contains(mongoId));
+        given().when().get("/" + mongoId + "/friends").then().body("mongoId", contains(secondMongoId));
+        given().when().get("/" + secondMongoId + "/friends").then().body("mongoId", contains(mongoId));
     }
 
     @Test
@@ -279,15 +279,15 @@ public class IntegrationTest {
         String city = "City";
         String birthDate = "0-1-1";
 
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
-        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response secondResponse = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String secondMongoId = secondResponse.getHeader("mongoId");
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
-        given().port(port).when().post("/" + mongoId + "/acceptInvitation?inviterId=" + secondMongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + mongoId + "/acceptInvitation?inviterId=" + secondMongoId);
 
-        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
-        given().port(port).when().get("/" + secondMongoId + "/invitations").then().body("mongoId", not(contains(mongoId)));
+        given().when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
+        given().when().get("/" + secondMongoId + "/invitations").then().body("mongoId", not(contains(mongoId)));
     }
 
     @Test
@@ -296,16 +296,16 @@ public class IntegrationTest {
         String city = "City";
         String birthDate = "0-1-1";
 
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
-        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response secondResponse = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String secondMongoId = secondResponse.getHeader("mongoId");
-        given().port(port).when().post("/" + mongoId + "/acceptInvitation?inviterId=" + secondMongoId);
+        given().when().post("/" + mongoId + "/acceptInvitation?inviterId=" + secondMongoId);
 
-        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
-        given().port(port).when().get("/" + secondMongoId + "/invitations").then().body("mongoId", not(contains(mongoId)));
-        given().port(port).when().get("/" + mongoId + "/friends").then().body("mongoId", not(contains(secondMongoId)));
-        given().port(port).when().get("/" + secondMongoId + "/friends").then().body("mongoId", not(contains(mongoId)));
+        given().when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
+        given().when().get("/" + secondMongoId + "/invitations").then().body("mongoId", not(contains(mongoId)));
+        given().when().get("/" + mongoId + "/friends").then().body("mongoId", not(contains(secondMongoId)));
+        given().when().get("/" + secondMongoId + "/friends").then().body("mongoId", not(contains(mongoId)));
     }
 
     @Test
@@ -314,15 +314,15 @@ public class IntegrationTest {
         String city = "City";
         String birthDate = "0-1-1";
 
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
-        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response secondResponse = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String secondMongoId = secondResponse.getHeader("mongoId");
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
-        given().port(port).when().post("/" + mongoId + "/acceptInvitation?inviterId=" + secondMongoId);
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + mongoId + "/acceptInvitation?inviterId=" + secondMongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
 
-        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
+        given().when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
     }
 
     @Test
@@ -331,14 +331,14 @@ public class IntegrationTest {
         String city = "City";
         String birthDate = "0-1-1";
 
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
-        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response secondResponse = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String secondMongoId = secondResponse.getHeader("mongoId");
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
-        given().port(port).when().post("/" + mongoId + "/declineInvitation?inviterId=" + secondMongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + mongoId + "/declineInvitation?inviterId=" + secondMongoId);
 
-        given().port(port).when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
+        given().when().get("/" + mongoId + "/invitations").then().body("mongoId", not(contains(secondMongoId)));
     }
 
     @Test
@@ -347,15 +347,15 @@ public class IntegrationTest {
         String city = "City";
         String birthDate = "0-1-1";
 
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
-        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response secondResponse = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String secondMongoId = secondResponse.getHeader("mongoId");
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
-        given().port(port).when().post("/" + mongoId + "/invite?inviteeId=" + secondMongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + mongoId + "/invite?inviteeId=" + secondMongoId);
 
-        given().port(port).when().get("/" + mongoId + "/network").then().body("mongoId", contains(secondMongoId));
-        given().port(port).when().get("/" + secondMongoId + "/network").then().body("mongoId", contains(mongoId));
+        given().when().get("/" + mongoId + "/network").then().body("mongoId", contains(secondMongoId));
+        given().when().get("/" + secondMongoId + "/network").then().body("mongoId", contains(mongoId));
     }
 
     @Test
@@ -364,17 +364,17 @@ public class IntegrationTest {
         String city = "City";
         String birthDate = "0-1-1";
 
-        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response response = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String mongoId = response.getHeader("mongoId");
-        Response secondResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response secondResponse = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String secondMongoId = secondResponse.getHeader("mongoId");
-        Response thirdResponse = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        Response thirdResponse = given().when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
         String thirdMongoId = thirdResponse.getHeader("mongoId");
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
-        given().port(port).when().post("/" + mongoId + "/invite?inviteeId=" + secondMongoId);
-        given().port(port).when().post("/" + secondMongoId + "/invite?inviteeId=" + thirdMongoId);
-        given().port(port).when().post("/" + thirdMongoId + "/invite?inviteeId=" + secondMongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + mongoId);
+        given().when().post("/" + mongoId + "/invite?inviteeId=" + secondMongoId);
+        given().when().post("/" + secondMongoId + "/invite?inviteeId=" + thirdMongoId);
+        given().when().post("/" + thirdMongoId + "/invite?inviteeId=" + secondMongoId);
 
-        given().port(port).when().get("/" + mongoId + "/network").then().body("mongoId", contains(secondMongoId, thirdMongoId));
+        given().when().get("/" + mongoId + "/network").then().body("mongoId", contains(secondMongoId, thirdMongoId));
     }
 }
