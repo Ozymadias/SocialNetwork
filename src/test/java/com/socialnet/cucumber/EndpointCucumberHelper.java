@@ -12,14 +12,18 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 
-@ContextConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class EndpointCucumberHelper {
@@ -29,47 +33,58 @@ public class EndpointCucumberHelper {
     @Autowired
     private UserRepository userRepository;
 
-    private User user;
-    private User[] users;
+    private User[] allUsers;
+    private List<User> users;
 
     @Before
     public void setUp() {
         RestAssured.port = port;
         userRepository.deleteAll();
+        users = new ArrayList<>();
     }
 
-    @Given("^user with name ([^\"]*), city ([^\"]*) and birth date (\\d+)-(\\d+)-(\\d+) in database$")
-    public void user_with_name_Name_city_City_and_birth_date_in_database(String name, String city, int birthdateYear, int birtdateMonth, int birthdateDay) {
+    @Given("^user with name ([^\"]*), city ([^\"]*) and birth date (\\d{1,4})-(\\d{1,2})-(\\d{1,2}) in database$")
+    public void user_with_name_Name_city_City_and_birth_date_in_database(String name, String city, String birthdateYear, String birtdateMonth, String birthdateDay) {
         String birthDate = birthdateYear + "-" + birtdateMonth + "-" + birthdateDay;
-        user = new User(name, city, birthDate);
-        userRepository.save(user);
+        users.add(new User(name, city, birthDate));
+        userRepository.save(users);
     }
 
-    @Given("^user with name ([^\"]*), city ([^\"]*) and birth date (\\d+)-(\\d+)-(\\d+)$")
-    public void user_with_name_Name_city_City_and_birth_date(String name, String city, int birthdateYear, int birtdateMonth, int birthdateDay) {
+    @Given("^user with name ([^\"]*), city ([^\"]*) and birth date (\\d{1,4})-(\\d{1,2})-(\\d{1,2})$")
+    public void user_with_name_Name_city_City_and_birth_date(String name, String city, String birthdateYear, String birtdateMonth, String birthdateDay) {
         String birthDate = birthdateYear + "-" + birtdateMonth + "-" + birthdateDay;
-        user = new User(name, city, birthDate);
+        users.add(new User(name, city, birthDate));
     }
 
-    @When("^one calls \\/([^\\s]*)$")
+    @Given("users")
+    public void user(List<Map<String, String>> dataTable) {
+        dataTable.forEach(System.out::println);
+        for (Map<String, String> map : dataTable) {
+            users.add(new User(map.get("name"), map.get("city"), map.get("birthdate")));
+        }
+    }
+
+    @When("^one calls /([^\\s]*)$")
     public void one_calls_findAll(String endpoint) {
-        users = given().when().get("/" + endpoint).as(User[].class);
+        allUsers = given().when().get("/" + endpoint).as(User[].class);
     }
 
-    @When("^one calls \\/([^\\s]*) with header city equal to ([^\\s]*)$")
+    @When("^one calls /([^\\s]*) with header city equal to ([^\\s]*)$")
     public void one_calls_findByCity_with_header_city_equal_to_City(String endpoint, String city) {
-        users = given().header("city", city).when().get("/" + endpoint).as(User[].class);
+        allUsers = given().header("city", city).when().get("/" + endpoint).as(User[].class);
     }
 
-    @When("^one calls \\/register that user$")
+    @When("^one registers that user\\(s\\)$")
     public void one_calls_register_that_user() {
-        Response response = given().when().post("/register?name=" + user.getName() + "&city=" + user.getCity() + "&birthDate=" + user.getBirthDate());
-        user.setId(response.getHeader("mongoId"));
+        for (User user : users) {
+            Response response = given().when().post("/register?name=" + user.getName() + "&city=" + user.getCity() + "&birthDate=" + user.getBirthDate());
+            user.setId(response.getHeader("mongoId"));
+        }
     }
 
-    @Then("^one should receives in response body that user$")
-    public void one_should_receives_in_response_body_that_user() {
-        assertThat(users.length, is(1));
-        assertThat(users[0], is(user));
+    @Then("^one should receives in response body that user\\(s\\)$")
+    public void one_should_receives_in_response_body_that_users() {
+        assertThat(allUsers.length, is(users.size()));
+        assertThat(Arrays.asList(allUsers), containsInAnyOrder(users.toArray()));
     }
 }
