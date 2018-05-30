@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
@@ -23,9 +24,10 @@ import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
+@DirtiesContext
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class IntegrationTest {
+public class IntegrationTestIT {
     @LocalServerPort
     private int port;
 
@@ -39,6 +41,7 @@ public class IntegrationTest {
     @Before
     public void setUp() {
         RestAssured.port = port;
+        RestAssured.baseURI = "http://localhost";
         userRepository.deleteAll();
         nodeRepository.deleteAll();
     }

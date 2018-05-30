@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 
+@DirtiesContext
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class EndpointCucumberHelper {
@@ -85,6 +87,10 @@ public class EndpointCucumberHelper {
     @Then("^one should receives in response body that user\\(s\\)$")
     public void one_should_receives_in_response_body_that_users() {
         assertThat(allUsers.length, is(users.size()));
+        System.out.println("allUsers");
+        Arrays.stream(allUsers).forEach(System.out::println);
+        System.out.println("users");
+        users.forEach(System.out::println);
         assertThat(Arrays.asList(allUsers), containsInAnyOrder(users.toArray()));
     }
 }
