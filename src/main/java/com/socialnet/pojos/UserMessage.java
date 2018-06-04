@@ -1,10 +1,12 @@
 package com.socialnet.pojos;
 
 public class UserMessage implements Comparable<UserMessage>{
-    private String authorId;
-    private Message message;
+    private final String authorId;
+    private final Message message;
 
     public UserMessage() {
+        authorId = null;
+        message = null;
     }
 
     public UserMessage(String authorId, Message message) {
@@ -16,16 +18,8 @@ public class UserMessage implements Comparable<UserMessage>{
         return authorId;
     }
 
-    public void setAuthorId(String authorId) {
-        this.authorId = authorId;
-    }
-
     public Message getMessage() {
         return message;
-    }
-
-    public void setMessage(Message message) {
-        this.message = message;
     }
 
     @Override

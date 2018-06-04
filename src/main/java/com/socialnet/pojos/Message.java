@@ -1,10 +1,12 @@
 package com.socialnet.pojos;
 
 public class Message {
-    private long timestamp;
-    private String content;
+    private final long timestamp;
+    private final String content;
 
     public Message() {
+        timestamp = 0;
+        content = null;
     }
 
     public Message(long timestamp, String content) {
@@ -16,15 +18,7 @@ public class Message {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
     public String getContent() {
         return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 }

@@ -10,12 +10,15 @@ import java.util.List;
 public class User {
     @Id
     private String id;
-    private String name;
-    private String city;
-    private String birthDate;
+    private final String name;
+    private final String city;
+    private final String birthDate;
     private List<Message> messages = new ArrayList<>();
 
     public User() {
+        name = null;
+        city = null;
+        birthDate = null;
     }
 
     public User(String name, String city, String birthDate) {
@@ -36,24 +39,12 @@ public class User {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getCity() {
         return city;
     }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
-
     public String getBirthDate() {
         return birthDate;
-    }
-
-    public void setBirthDate(String birthDate) {
-        this.birthDate = birthDate;
     }
 
     public List<Message> getMessages() {
