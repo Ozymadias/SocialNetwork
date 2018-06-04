@@ -30,6 +30,7 @@ public class NodeRouteBuilder extends RouteBuilder {
                 .otherwise()
                 .to("direct:sendInvitation")
                 .endChoice()
+                .otherwise().process(exchange -> exchange.getOut().setBody("You can not sent invitation to friend of yours"))
                 .endChoice();
 
         from("direct:acceptPreviouslySendInvitation")
