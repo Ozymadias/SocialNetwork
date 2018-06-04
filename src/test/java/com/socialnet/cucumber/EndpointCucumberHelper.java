@@ -60,7 +60,6 @@ public class EndpointCucumberHelper {
 
     @Given("users")
     public void user(List<Map<String, String>> dataTable) {
-        dataTable.forEach(System.out::println);
         for (Map<String, String> map : dataTable) {
             users.add(new User(map.get("name"), map.get("city"), map.get("birthdate")));
         }
@@ -87,10 +86,6 @@ public class EndpointCucumberHelper {
     @Then("^one should receives in response body that user\\(s\\)$")
     public void one_should_receives_in_response_body_that_users() {
         assertThat(allUsers.length, is(users.size()));
-        System.out.println("allUsers");
-        Arrays.stream(allUsers).forEach(System.out::println);
-        System.out.println("users");
-        users.forEach(System.out::println);
         assertThat(Arrays.asList(allUsers), containsInAnyOrder(users.toArray()));
     }
 }
