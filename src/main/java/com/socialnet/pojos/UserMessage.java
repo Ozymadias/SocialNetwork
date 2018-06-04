@@ -4,6 +4,9 @@ public class UserMessage implements Comparable<UserMessage>{
     private String authorId;
     private Message message;
 
+    public UserMessage() {
+    }
+
     public UserMessage(String authorId, Message message) {
         this.authorId = authorId;
         this.message = message;

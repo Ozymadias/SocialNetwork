@@ -1,10 +1,19 @@
 package com.socialnet;
 
+import com.socialnet.pojos.Message;
 import com.socialnet.pojos.Node;
 import com.socialnet.pojos.User;
+import com.socialnet.pojos.UserMessage;
 import com.socialnet.repositories.NodeRepository;
 import com.socialnet.repositories.UserRepository;
 import io.restassured.RestAssured;
+import io.restassured.config.EncoderConfig;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.http.ContentType;
+import io.restassured.mapper.ObjectMapper;
+import io.restassured.mapper.ObjectMapperDeserializationContext;
+import io.restassured.mapper.ObjectMapperSerializationContext;
+import io.restassured.parsing.Parser;
 import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.restassured.RestAssured.*;
+import static io.restassured.config.EncoderConfig.encoderConfig;
 import static io.restassured.matcher.RestAssuredMatchers.*;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -377,5 +387,22 @@ public class IntegrationTestIT {
         given().when().post("/" + thirdMongoId + "/invite?inviteeId=" + secondMongoId);
 
         given().when().get("/" + mongoId + "/network").then().body("mongoId", contains(secondMongoId, thirdMongoId));
+    }
+
+    @Test
+    public void postedMessageShouldBeSavedInDatabase() {
+        String name = "Name";
+        String city = "City";
+        String birthDate = "0-1-1";
+
+        Response response = given().port(port).when().post("/register?name=" + name + "&city=" + city + "&birthDate=" + birthDate);
+        String mongoId = response.getHeader("mongoId");
+        String messageContent = "Message Content";
+        given().port(port).body("\"" + messageContent + "\"").when().post("/" + mongoId + "/postMessage");
+
+        User user = userRepository.findById(mongoId);
+        List<Message> messages = user.getMessages();
+        assertThat(messages.size(), is(1));
+        assertThat(messages.get(0).getContent(), is(messageContent));
     }
 }
