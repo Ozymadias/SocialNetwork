@@ -1,5 +1,6 @@
 package com.socialnet.pojos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -51,6 +52,7 @@ public class User {
         return messages;
     }
 
+    @JsonIgnore
     public void setMessages(List<Message> messages) {
         this.messages = messages;
     }

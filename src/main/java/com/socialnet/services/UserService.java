@@ -15,15 +15,13 @@ public class UserService {
     UserRepository userRepository;
 
     public String register(String name, String city, String birthDate) {
-        User user = new User(name, city, birthDate);
+        User user = new User(name.replace("_", " "), city.replace("_", " "), birthDate);
         userRepository.save(user);
         return user.getId();
     }
 
     public List<User> findAll() {
-        List<User> all = userRepository.findAll();
-        all.forEach(user -> user.getMessages().clear());
-        return all;
+        return userRepository.findAll();
     }
 
     public User findByMongoId(String id) {
