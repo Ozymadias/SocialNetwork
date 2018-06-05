@@ -27,4 +27,10 @@ public interface NodeRepository extends Neo4jRepository<Node, Long> {
 
     @Query("MATCH (a { mongoId: {userId}}),(b { mongoId: {otherId}}), p = shortestPath((a)-[*]-(b)) WHERE NONE (r IN relationships(p) WHERE type(r)= 'INVITATION') RETURN length(p)")
     Integer distanceFactor(@Param("userId") String userId, @Param("otherId") String otherId);
+
+    @Query("MATCH (a { mongoId: {userId}}), (b { mongoId: {inviteeId}}) CREATE (a)-[:INVITATION]->(b)")
+    void sendInvitation(@Param("userId") String userId,@Param("inviteeId") String inviteeId);
+
+    @Query("MATCH (a { mongoId: {userId}}), (b { mongoId: {inviterId}}) CREATE (a)-[:IS_FRIEND]->(b)")
+    void friend(@Param("userId") String userId,@Param("inviterId") String inviterId);
 }

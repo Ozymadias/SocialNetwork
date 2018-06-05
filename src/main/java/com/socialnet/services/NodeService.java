@@ -24,10 +24,7 @@ public class NodeService {
     }
 
     public void sendInvitation(String userId, String inviteeId) {
-        Node user = nodeRepository.findByMongoId(userId);
-        Node invitee = nodeRepository.findByMongoId(inviteeId);
-        invitee.addInviter(user);
-        nodeRepository.save(invitee);
+        nodeRepository.sendInvitation(userId, inviteeId);
     }
 
     public Collection<Node> invitations(String userId) {
@@ -39,14 +36,7 @@ public class NodeService {
     }
 
     public void acceptInvitation(String userId, String inviterId) {
-        Node user = nodeRepository.findByMongoId(userId);
-        Node inviter = nodeRepository.findByMongoId(inviterId);
-
-        if (nodeRepository.invitations(userId).contains(inviter)) {
-            user.addFriendship(inviter);
-            nodeRepository.save(user);
-            nodeRepository.declineInvitation(inviterId, userId);
-        }
+        nodeRepository.friend(userId, inviterId);
     }
 
     public Collection<Node> network(String userId) {

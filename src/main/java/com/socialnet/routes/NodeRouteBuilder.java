@@ -26,7 +26,6 @@ public class NodeRouteBuilder extends RouteBuilder {
                 .choice()
                 .when(didUserReceiveInvitationFromPersonWhoHeWantsInvite)
                 .to("direct:acceptPreviouslySendInvitation")
-                .to("direct:acceptPreviouslySendInvitation")
                 .otherwise()
                 .to("direct:sendInvitation")
                 .endChoice()
